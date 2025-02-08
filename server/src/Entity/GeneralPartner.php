@@ -6,6 +6,7 @@ use App\Repository\GeneralPartnerRepository;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: GeneralPartnerRepository::class)]
 #[ORM\InheritanceType("JOINED")]
@@ -17,23 +18,27 @@ use Doctrine\ORM\Mapping as ORM;
         "affiliatePartner" => AffiliatePartner::class
     ]
 )]
-class GeneralPartner extends Partner
+abstract class GeneralPartner extends Partner
 {
-    #[ORM\ManyToOne(targetEntity: GrowthPartner::class)]
-    #[ORM\JoinColumn(name: "registered_partner_id", referencedColumnName: "id", nullable: true)]
-    private ?GrowthPartner $registeredPartner = null;
+    #[ORM\ManyToOne(targetEntity: GrowthPartner::class, inversedBy: "partners")]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?GrowthPartner $registeredPartner;
 
+    #[Groups(['read'])]
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $contactPerson = null;
+    private ?string $contactPerson;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private DateTimeInterface $startDate;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?DateTimeInterface $endDate = null;
+    private ?DateTimeInterface $endDate;
 
+    #[Groups(['read'])]
     #[ORM\Column(nullable: true)]
-    private ?int $renewalInterval = null;
+    private ?int $renewalInterval;
 
     /**
      * @param string $name
@@ -54,9 +59,10 @@ class GeneralPartner extends Partner
         $this->renewalInterval = $renewalInterval;
     }
 
-    public function getRegisteredPartner(): ?GrowthPartner
+    #[Groups(['read'])]
+    public function getRegisteredPartnerId(): ?string
     {
-        return $this->registeredPartner;
+        return $this->registeredPartner?->getId()->toString();
     }
 
     public function getContactPerson(): ?string

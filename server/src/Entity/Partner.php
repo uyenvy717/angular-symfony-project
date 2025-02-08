@@ -5,7 +5,10 @@ namespace App\Entity;
 use App\Interface\IDable;
 use App\Repository\PartnerRepository;
 use App\Traits\IDScheme;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PartnerRepository::class)]
 #[ORM\InheritanceType("JOINED")]
@@ -20,11 +23,19 @@ abstract class Partner implements IDable
 {
     use IDScheme;
 
+    #[Groups(['read'])]
     #[ORM\Column(length: 255)]
     private string $name;
 
+    #[Groups(['read'])]
     #[ORM\Column(length: 255)]
     private string $email;
+
+    #[ORM\OneToMany(targetEntity: Client::class, mappedBy: "partner")]
+    private Collection $clients;
+
+//    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "partner")]
+//    private Collection $users;
 
     /**
      * @param string $name
@@ -34,6 +45,7 @@ abstract class Partner implements IDable
     {
         $this->name = $name;
         $this->email = $email;
+        $this->clients = new ArrayCollection();
     }
 
     public function getName(): string
@@ -45,4 +57,16 @@ abstract class Partner implements IDable
     {
         return $this->email;
     }
+
+    #[Groups(['read'])]
+    public function getClients(): array
+    {
+        return $this->clients->toArray();
+    }
+
+//    #[Groups(['read'])]
+//    public function getUsers(): array
+//    {
+//        return $this->users->toArray();
+//    }
 }

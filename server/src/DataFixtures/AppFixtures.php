@@ -3,16 +3,12 @@
 namespace App\DataFixtures;
 
 use App\Entity\AffiliatePartner;
-use App\Entity\AffiliatePartnerClient;
+use App\Entity\Client;
 use App\Entity\GrowthPartner;
-use App\Entity\GeneralPartner;
-use App\Entity\GrowthPartnerClient;
 use App\Entity\GrowthPartnerUser;
 use App\Entity\SolutionPartner;
-use App\Entity\SolutionPartnerClient;
 use App\Entity\SolutionPartnerUser;
 use App\Entity\SolutionProvider;
-use App\Entity\SolutionProviderClient;
 use App\Entity\SolutionProviderUser;
 use Carbon\Carbon;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -29,19 +25,31 @@ class AppFixtures extends Fixture
 
         $solutionPartner = new SolutionPartner("solutionPartner", "solution@partner", $growthPartner, null, Carbon::now(), null, null);
         $manager->persist($solutionPartner);
+        $solutionPartner2 = new SolutionPartner("solutionPartner2", "solution2@partner", $growthPartner2, null, Carbon::now(), null, null);
+        $manager->persist($solutionPartner2);
         $solutionProvider = new SolutionProvider("solutionProvider", "solution@provider", $growthPartner, null, Carbon::now(), null, null);
         $manager->persist($solutionProvider);
         $affiliatePartner = new AffiliatePartner("affiliatePartner", "affiliate@partner", $growthPartner2, null, Carbon::now(), null, null);
         $manager->persist($affiliatePartner);
 
-        $client = new GrowthPartnerClient("gpClient", "gp@client", true, $growthPartner2);
+        $client = new Client("gpClient", "gp@client", true);
+        $client->setPartner($growthPartner2);
         $manager->persist($client);
-        $client2 = new SolutionPartnerClient("spaClient", "spa@client", true, $solutionPartner);
+        $client2 = new Client("spaClient", "spa@client", true);
+        $client2->setPartner($solutionPartner);
         $manager->persist($client2);
-        $client3 = new SolutionProviderClient("sprClient", "spr@client", true, $solutionProvider);
+        $client3 = new Client("sprClient", "spr@client", true);
+        $client3->setPartner($solutionProvider);
         $manager->persist($client3);
-        $client4 = new AffiliatePartnerClient("aClient", "a@client", true, $affiliatePartner);
+        $client4 = new Client("aClient", "a@client", true);
+        $client4->setPartner($affiliatePartner);
         $manager->persist($client4);
+        $client5 = new Client("spaClient2", "spa2@client", true);
+        $client5->setPartner($solutionPartner2);
+        $manager->persist($client5);
+        $client6 = new Client("spaClient3", "spa3@client", true);
+        $client6->setPartner($solutionPartner2);
+        $manager->persist($client6);
 
         $user = new GrowthPartnerUser("gpUser", "gp@user", true, null, $growthPartner);
         $manager->persist($user);

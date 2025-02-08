@@ -16,15 +16,9 @@ trait IDScheme
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id;
 
+    #[Groups(['read'])]
     public function getId(): ?Uuid
     {
         return $this->id;
     }
-
-    #[Groups(['read'])]
-    public function getReference(): ?Uuid
-    {
-        return $this->id;
-    }
-
 }
