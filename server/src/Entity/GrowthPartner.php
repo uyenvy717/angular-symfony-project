@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: GrowthPartnerRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['read']],
+    denormalizationContext: ['groups' => ['write']],
 )]
 class GrowthPartner extends Partner
 {
@@ -31,8 +31,16 @@ class GrowthPartner extends Partner
     private ?DateTimeInterface $endDate;
 
     #[Groups(['read'])]
-    #[ORM\OneToMany(targetEntity: GeneralPartner::class, mappedBy: 'registeredPartner')]
-    private Collection $partners;
+    #[ORM\OneToMany(targetEntity: SolutionPartner::class, mappedBy: 'registeredPartner')]
+    private Collection $solutionPartners;
+
+    #[Groups(['read'])]
+    #[ORM\OneToMany(targetEntity: SolutionProvider::class, mappedBy: 'registeredPartner')]
+    private Collection $solutionProviders;
+
+    #[Groups(['read'])]
+    #[ORM\OneToMany(targetEntity: AffiliatePartner::class, mappedBy: 'registeredPartner')]
+    private Collection $affiliatePartners;
 
     /**
      * @param string $name
@@ -47,7 +55,9 @@ class GrowthPartner extends Partner
         $this->contactPerson = $contactPerson;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
-        $this->partners = new ArrayCollection();
+        $this->solutionPartners = new ArrayCollection();
+        $this->solutionProviders = new ArrayCollection();
+        $this->affiliatePartners = new ArrayCollection();
     }
 
     public function getContactPerson(): ?string
@@ -68,8 +78,18 @@ class GrowthPartner extends Partner
     /**
      * @return Collection<Partner>
      */
-    public function getPartners(): Collection
+    public function getSolutionPartners(): Collection
     {
-        return $this->partners;
+        return $this->solutionPartners;
+    }
+
+    public function getSolutionProviders(): Collection
+    {
+        return $this->solutionProviders;
+    }
+
+    public function getAffiliatePartners(): Collection
+    {
+        return $this->affiliatePartners;
     }
 }

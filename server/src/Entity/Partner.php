@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Interface\IDable;
 use App\Repository\PartnerRepository;
 use App\Traits\IDScheme;
@@ -15,10 +16,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\DiscriminatorColumn(name: "partner_type", type: "string")]
 #[ORM\DiscriminatorMap(
     [
-        "growth" => GrowthPartner::class,
-        "generalPartner" => GeneralPartner::class
+        "growth_partners" => GrowthPartner::class,
+        "solution_partners" => SolutionPartner::class,
+        "solution_providers" => SolutionProvider::class,
+        "affiliate_partners" => AffiliatePartner::class
     ]
 )]
+#[ApiResource]
 abstract class Partner implements IDable
 {
     use IDScheme;
@@ -27,15 +31,12 @@ abstract class Partner implements IDable
     #[ORM\Column(length: 255)]
     private string $name;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'client:read'])]
     #[ORM\Column(length: 255)]
     private string $email;
 
     #[ORM\OneToMany(targetEntity: Client::class, mappedBy: "partner")]
     private Collection $clients;
-
-//    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "partner")]
-//    private Collection $users;
 
     /**
      * @param string $name
@@ -63,10 +64,4 @@ abstract class Partner implements IDable
     {
         return $this->clients->toArray();
     }
-
-//    #[Groups(['read'])]
-//    public function getUsers(): array
-//    {
-//        return $this->users->toArray();
-//    }
 }

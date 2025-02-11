@@ -32,31 +32,25 @@ class AppFixtures extends Fixture
         $affiliatePartner = new AffiliatePartner("affiliatePartner", "affiliate@partner", $growthPartner2, null, Carbon::now(), null, null);
         $manager->persist($affiliatePartner);
 
-        $client = new Client("gpClient", "gp@client", true);
-        $client->setPartner($growthPartner2);
+        $client = new Client("gpClient", "gp@client", true, $growthPartner2, Carbon::now());
         $manager->persist($client);
-        $client2 = new Client("spaClient", "spa@client", true);
-        $client2->setPartner($solutionPartner);
+        $client2 = new Client("spaClient", "spa@client", true, $solutionPartner, Carbon::now());
         $manager->persist($client2);
-        $client3 = new Client("sprClient", "spr@client", true);
-        $client3->setPartner($solutionProvider);
+        $client3 = new Client("sprClient", "spr@client", true, $solutionProvider, Carbon::now());
         $manager->persist($client3);
-        $client4 = new Client("aClient", "a@client", true);
-        $client4->setPartner($affiliatePartner);
+        $client4 = new Client("aClient", "a@client", true, $affiliatePartner, Carbon::now());
         $manager->persist($client4);
-        $client5 = new Client("spaClient2", "spa2@client", true);
-        $client5->setPartner($solutionPartner2);
+        $client5 = new Client("spaClient2", "spa2@client", true, $solutionPartner2, Carbon::now());
         $manager->persist($client5);
-        $client6 = new Client("spaClient3", "spa3@client", true);
-        $client6->setPartner($solutionPartner2);
+        $client6 = new Client("spaClient3", "spa3@client", true, $solutionPartner2, Carbon::now());
         $manager->persist($client6);
 
-        $user = new GrowthPartnerUser("gpUser", "gp@user", true, null, $growthPartner);
-        $manager->persist($user);
-        $user2 = new SolutionPartnerUser("spaUser", "spa@user", true, Carbon::now(), $solutionPartner);
-        $manager->persist($user2);
-        $user3 = new SolutionProviderUser("sprUser", "spr@user", true, Carbon::now(), $solutionProvider);
-        $manager->persist($user3);
+//        $user = new GrowthPartnerUser("gpUser", "gp@user", true, null, $growthPartner);
+//        $manager->persist($user);
+//        $user2 = new SolutionPartnerUser("spaUser", "spa@user", true, Carbon::now(), $solutionPartner);
+//        $manager->persist($user2);
+//        $user3 = new SolutionProviderUser("sprUser", "spr@user", true, Carbon::now(), $solutionProvider);
+//        $manager->persist($user3);
 
         $manager->flush();
     }

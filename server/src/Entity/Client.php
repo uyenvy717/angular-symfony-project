@@ -3,68 +3,102 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
 use App\Repository\ClientRepository;
 use App\Traits\IDScheme;
+use Carbon\Carbon;
+use DateTimeInterface;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['read']],
+    normalizationContext: ['groups' => ['client:read']]
 )]
+#[Get]
+#[Post(
+    denormalizationContext: ['groups' => ['client:post']]
+)]
+#[Patch(denormalizationContext: ['groups' => ['patch']])]
 class Client implements IDable
 {
     use IDScheme;
 
-    #[Groups(['read'])]
     #[ORM\Column]
     private bool $isActive;
 
-    #[Groups(['read'])]
+    #[Groups(['client:read', 'patch', 'client:post'])]
     #[ORM\Column(length: 255)]
     private string $name;
 
-    #[Groups(['read'])]
+    #[Groups(['client:read', 'client:post'])]
     #[ORM\Column(length: 255)]
     private string $email;
+
+    #[Groups(['client:read', 'client:post'])]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private DateTimeInterface $startDate;
 
     /**
      * a client can have a partner, but might not have one
      */
     #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "clients")]
     #[ORM\JoinColumn(nullable: true)]
-    private ?Partner $partner = null;
+    private ?Partner $partner;
 
     /**
      * @param string $name
      * @param string $email
      * @param bool $isActive
+     * @param Partner|null $partner
+     * @param DateTimeInterface|null $startDate
      */
-    public function __construct(string $name, string $email, bool $isActive)
+    public function __construct(string $name, string $email, bool $isActive, ?Partner $partner, ?DateTimeInterface $startDate)
     {
-
         $this->name = $name;
         $this->email = $email;
         $this->isActive = $isActive;
+        $this->partner = $partner ?? null;
+        $this->startDate = $startDate ?? Carbon::now();
     }
 
+    #[Groups(['client:read'])]
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    #[Groups(['patch', 'client:post'])]
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
+    }
+
+    #[Groups(['patch', 'client:post'])]
     public function setPartner(?Partner $partner): void
     {
         $this->partner = $partner;
     }
 
-    #[Groups(['read'])]
-    public function getPartnerId(): ?string
+    #[Groups(['client:read'])]
+    public function getPartner(): ?Partner
     {
-        return $this->partner?->getId()->toString();
+        return $this->partner;
     }
 
-
-    public function isActive(): bool
+    #[Groups(['patch'])]
+    public function setStartDate(?DateTimeInterface $startDate): void
     {
-        return $this->isActive;
+        $this->startDate = $startDate;
+    }
+
+    public function getStartDate(): DateTimeInterface
+    {
+        return $this->startDate;
     }
 
     public function getName(): string
@@ -72,8 +106,23 @@ class Client implements IDable
         return $this->name;
     }
 
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function getRegisteredPartnerId(): ?string
+    {
+        return $this->partner?->getId()->toString();
     }
 }
