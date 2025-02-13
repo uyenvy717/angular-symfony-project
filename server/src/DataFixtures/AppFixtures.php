@@ -10,6 +10,7 @@ use App\Entity\SolutionPartner;
 use App\Entity\SolutionPartnerUser;
 use App\Entity\SolutionProvider;
 use App\Entity\SolutionProviderUser;
+use App\Entity\User;
 use Carbon\Carbon;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -45,12 +46,12 @@ class AppFixtures extends Fixture
         $client6 = new Client("spaClient3", "spa3@client", true, $solutionPartner2, Carbon::now());
         $manager->persist($client6);
 
-//        $user = new GrowthPartnerUser("gpUser", "gp@user", true, null, $growthPartner);
-//        $manager->persist($user);
-//        $user2 = new SolutionPartnerUser("spaUser", "spa@user", true, Carbon::now(), $solutionPartner);
-//        $manager->persist($user2);
-//        $user3 = new SolutionProviderUser("sprUser", "spr@user", true, Carbon::now(), $solutionProvider);
-//        $manager->persist($user3);
+        $user = new User("gpUser", "gp@user", true, null, $growthPartner);
+        $manager->persist($user);
+        $user2 = new User("spaUser", "spa@user", true, Carbon::now(), $solutionPartner);
+        $manager->persist($user2);
+        $user3 = new User("sprUser", "spr@user", true, Carbon::now(), $solutionProvider);
+        $manager->persist($user3);
 
         $manager->flush();
     }
