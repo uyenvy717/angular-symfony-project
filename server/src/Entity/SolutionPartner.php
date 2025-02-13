@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\SolutionPartnerRepository;
 use App\Traits\GeneralPartnerTrait;
 use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -21,6 +22,9 @@ class SolutionPartner extends Partner
     #[ORM\ManyToOne(targetEntity: GrowthPartner::class, inversedBy: "solutionPartners")]
     #[ORM\JoinColumn(nullable: true)]
     private ?GrowthPartner $registeredPartner;
+
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "solutionPartner")]
+    private Collection $users;
 
     /**
      * @param string $name
@@ -50,5 +54,11 @@ class SolutionPartner extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
+    }
+
+    #[Groups(['read'])]
+    public function getUsers(): array
+    {
+        return $this->users->toArray();
     }
 }

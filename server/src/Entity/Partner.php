@@ -38,9 +38,6 @@ abstract class Partner implements IDable
     #[ORM\OneToMany(targetEntity: Client::class, mappedBy: "partner")]
     private Collection $clients;
 
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "partner")]
-    private Collection $users;
-
     /**
      * @param string $name
      * @param string $email
@@ -66,11 +63,5 @@ abstract class Partner implements IDable
     public function getClients(): array
     {
         return $this->clients->toArray();
-    }
-
-    #[Groups(['read'])]
-    public function getUsers(): array
-    {
-        return $this->users->toArray();
     }
 }
