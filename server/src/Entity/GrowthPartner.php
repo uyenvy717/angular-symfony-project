@@ -42,9 +42,6 @@ class GrowthPartner extends Partner
     #[ORM\OneToMany(targetEntity: AffiliatePartner::class, mappedBy: 'registeredPartner')]
     private Collection $affiliatePartners;
 
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "growthPartner")]
-    private Collection $users;
-
     /**
      * @param string $name
      * @param string $email
@@ -95,11 +92,5 @@ class GrowthPartner extends Partner
     public function getAffiliatePartners(): Collection
     {
         return $this->affiliatePartners;
-    }
-
-    #[Groups(['read'])]
-    public function getUsers(): array
-    {
-        return $this->users->toArray();
     }
 }

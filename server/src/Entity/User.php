@@ -16,7 +16,6 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Validator\Exception\InvalidArgumentException;
 
 #[AllowDynamicProperties]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -26,7 +25,6 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
         new Get(),
         new Post(
             denormalizationContext: ['groups' => ['user:post']],
-//            processor: UserProcessor::class,
         ),
         new Patch(
             denormalizationContext: ['groups' => ['user:patch']],
@@ -49,21 +47,9 @@ class User implements IDable
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $lastLoggedIn;
 
-//    #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "users")]
-//    #[ORM\JoinColumn]
-//    private Partner $partner;
-
-    #[ORM\ManyToOne(targetEntity: GrowthPartner::class, inversedBy: "users")]
+    #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "users")]
     #[ORM\JoinColumn]
-    private Partner $growthPartner;
-
-    #[ORM\ManyToOne(targetEntity: SolutionPartner::class, inversedBy: "users")]
-    #[ORM\JoinColumn]
-    private Partner $solutionPartner;
-
-    #[ORM\ManyToOne(targetEntity: SolutionProvider::class, inversedBy: "users")]
-    #[ORM\JoinColumn]
-    private Partner $solutionProvider;
+    private Partner $partner;
 
     /**
      * @param string $name
@@ -76,7 +62,7 @@ class User implements IDable
         $this->email = $email;
         $this->isActive = true;
         $this->lastLoggedIn = Carbon::now();
-        $this->setPartner($partner);
+        $this->partner = $partner;
     }
 
     public function isActive(): bool
@@ -101,7 +87,7 @@ class User implements IDable
 
     public function getPartner(): Partner
     {
-        return $this->growthPartner ?? $this->solutionPartner ?? $this->solutionProvider;
+        return $this->partner;
     }
 
     #[Groups(['user:patch'])]
@@ -130,22 +116,6 @@ class User implements IDable
     #[Groups(['user:post', 'user:patch'])]
     public function setPartner(?Partner $partner): void
     {
-        if ($partner instanceof GrowthPartner) {
-            $this->growthPartner = $partner;
-        } elseif ($partner instanceof SolutionPartner) {
-            $this->solutionPartner = $partner;
-        } elseif ($partner instanceof SolutionProvider) {
-            $this->solutionProvider = $partner;
-        } else {
-            throw new InvalidArgumentException("Invalid partner type for User.");
-        }
+        $this->partner = $partner;
     }
-
-//    #[Assert\Callback]
-//    public function validate(ExecutionContextInterface $context, mixed $payload): void
-//    {
-//        if ($this->partner instanceof AffiliatePartner) {
-//            throw new BadRequestHttpException("Users cannot be assigned to an Affiliate Partner.");
-//        }
-//    }
 }

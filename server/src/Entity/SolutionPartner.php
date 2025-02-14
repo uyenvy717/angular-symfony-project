@@ -23,9 +23,6 @@ class SolutionPartner extends Partner
     #[ORM\JoinColumn(nullable: true)]
     private ?GrowthPartner $registeredPartner;
 
-    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "solutionPartner")]
-    private Collection $users;
-
     /**
      * @param string $name
      * @param string $email
@@ -54,11 +51,5 @@ class SolutionPartner extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
-    }
-
-    #[Groups(['read'])]
-    public function getUsers(): array
-    {
-        return $this->users->toArray();
     }
 }
