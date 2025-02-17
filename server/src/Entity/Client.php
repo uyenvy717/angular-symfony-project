@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
@@ -20,6 +21,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource(
     operations: [
         new Get(),
+        new GetCollection(),
         new Post(
           denormalizationContext: ['groups' => ['client:post']]
         ),

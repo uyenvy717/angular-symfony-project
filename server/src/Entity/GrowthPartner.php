@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use AllowDynamicProperties;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\GrowthPartnerRepository;
 use DateTimeInterface;
@@ -11,6 +12,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+#[AllowDynamicProperties]
 #[ORM\Entity(repositoryClass: GrowthPartnerRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['read']],

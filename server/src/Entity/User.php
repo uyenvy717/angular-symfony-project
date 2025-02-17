@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
-use AllowDynamicProperties;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
@@ -17,12 +17,12 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[AllowDynamicProperties]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "portal_user")]
 #[ApiResource(
     operations: [
         new Get(),
+        new GetCollection(),
         new Post(
             denormalizationContext: ['groups' => ['user:post']],
         ),
