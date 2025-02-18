@@ -50,6 +50,7 @@ abstract class Partner implements IDable
         $this->name = $name;
         $this->email = $email;
         $this->clients = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getName(): string

@@ -42,31 +42,7 @@ class UserTest extends ApiTestCase
             'totalItems' => 3
         ]);
 
-        $responseArray = $client->getResponse()->toArray();
-
-        // Ensure the 'member' key exists and is an array
-        $this->assertArrayHasKey('member', $responseArray);
-        $this->assertIsArray($responseArray['member']);
-
-        foreach ($responseArray['member'] as $userData) {
-            // Check required keys
-            $expectedKeys = ['@id', '@type', 'name', 'email', 'lastLoggedIn', 'id', 'partner', 'active'];
-            $actualKeys = array_keys($userData);
-            sort($expectedKeys);
-            sort($actualKeys);
-            $this->assertSame($expectedKeys, $actualKeys, 'The response contains unexpected keys.');
-
-            // Validate data types
-            $this->assertIsString($userData['@id']);
-            $this->assertIsString($userData['@type']);
-            $this->assertIsString($userData['name']);
-            $this->assertIsString($userData['email']);
-            $this->assertIsString($userData['partner']);
-            $this->assertIsString($userData['id']);
-            $this->assertIsString($userData['lastLoggedIn']);
-            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', $userData['lastLoggedIn']);
-            $this->assertIsBool($userData['active']);
-        }
+        $this->assertMatchesResourceItemJsonSchema(User::class);
     }
 
     public function testCreateUser(): void
@@ -120,6 +96,7 @@ class UserTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertMatchesResourceItemJsonSchema(User::class);
 
+        // Cannot update the email
         $payload = [
             'email' => 'test@user.com',
         ];

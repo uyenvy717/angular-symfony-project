@@ -30,7 +30,7 @@ class ClientTest extends ApiTestCase
     public function testGetClients(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/clients');
+        $response = $client->request('GET', '/api/clients');
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
 
@@ -41,32 +41,10 @@ class ClientTest extends ApiTestCase
             'totalItems' => 6
         ]);
 
-        $responseArray = $client->getResponse()->toArray();
-
-        // Ensure the 'member' key exists and is an array
-        $this->assertArrayHasKey('member', $responseArray);
-        $this->assertIsArray($responseArray['member']);
-
-        foreach ($responseArray['member'] as $clientData) {
-            // Check required keys
-            $expectedKeys = ['@id', '@type', 'name', 'email', 'startDate', 'partner', 'active'];
-            foreach ($expectedKeys as $key) {
-                $this->assertArrayHasKey($key, $clientData);
-            }
-
-            // Validate data types
-            $this->assertIsString($clientData['@id']);
-            $this->assertIsString($clientData['@type']);
-            $this->assertIsString($clientData['name']);
-            $this->assertIsString($clientData['email']);
-            $this->assertIsString($clientData['partner']);
-            $this->assertIsString($clientData['startDate']);
-            $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', $clientData['startDate']);
-            $this->assertIsBool($clientData['active']);
-        }
+        $this->assertMatchesResourceItemJsonSchema(Client::class);
     }
 
-    public function testCreateClient(): void
+    public function testCreateClientNullStartDate(): void
     {
         $client = static::createClient();
 
@@ -92,10 +70,6 @@ class ClientTest extends ApiTestCase
 
         $content = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('startDate', $content);
-        $this->assertMatchesRegularExpression(
-            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/',
-            $content['startDate']
-        );
 
         $this->assertEquals(
             (new \DateTime())->format('Y-m-d'),

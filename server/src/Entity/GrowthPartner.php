@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use AllowDynamicProperties;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\GrowthPartnerRepository;
 use DateTimeInterface;
@@ -12,7 +11,6 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[AllowDynamicProperties]
 #[ORM\Entity(repositoryClass: GrowthPartnerRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['read']],
@@ -60,7 +58,6 @@ class GrowthPartner extends Partner
         $this->solutionPartners = new ArrayCollection();
         $this->solutionProviders = new ArrayCollection();
         $this->affiliatePartners = new ArrayCollection();
-        $this->users = new ArrayCollection();
     }
 
     public function getContactPerson(): ?string
