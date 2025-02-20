@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
@@ -17,13 +19,19 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(
+          denormalizationContext: ['groups' => ['client:post']]
+        ),
+        new Patch(
+          denormalizationContext: ['groups' => ['client:patch']]
+        ),
+        new Delete()
+    ],
     normalizationContext: ['groups' => ['client:read']]
 )]
-#[Get]
-#[Post(
-    denormalizationContext: ['groups' => ['client:post']]
-)]
-#[Patch(denormalizationContext: ['groups' => ['patch']])]
 class Client implements IDable
 {
     use IDScheme;
@@ -31,7 +39,7 @@ class Client implements IDable
     #[ORM\Column]
     private bool $isActive;
 
-    #[Groups(['client:read', 'patch', 'client:post'])]
+    #[Groups(['client:read', 'client:patch', 'client:post'])]
     #[ORM\Column(length: 255)]
     private string $name;
 
@@ -72,13 +80,13 @@ class Client implements IDable
         return $this->isActive;
     }
 
-    #[Groups(['patch', 'client:post'])]
+    #[Groups(['client:patch', 'client:post'])]
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
     }
 
-    #[Groups(['patch', 'client:post'])]
+    #[Groups(['client:patch', 'client:post'])]
     public function setPartner(?Partner $partner): void
     {
         $this->partner = $partner;
@@ -90,7 +98,7 @@ class Client implements IDable
         return $this->partner;
     }
 
-    #[Groups(['patch'])]
+    #[Groups(['client:patch'])]
     public function setStartDate(?DateTimeInterface $startDate): void
     {
         $this->startDate = $startDate;

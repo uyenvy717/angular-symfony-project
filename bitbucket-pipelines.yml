@@ -1,0 +1,81 @@
+image: twistedbytes/centos9-php83
+
+clone:
+  depth: full              # SonarCloud scanner needs the full history to assign issues properly
+
+definitions:
+  services:
+    docker:
+      memory: 2048
+    database:
+      image: postgres:16-alpine
+      environment:
+        POSTGRES_DB: app_test
+        POSTGRES_PASSWORD: '!ChangeMe!'
+        POSTGRES_USER: app_test
+      command: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+  caches:
+    sonar: ~/.sonar/cache  # Caching SonarCloud artifacts will speed up your build
+    vendor: vendor
+    composer: composer
+  steps:
+    - step: &unit-tests
+        name: PHP unit tests
+        caches:
+          - vendor
+          - composer
+        services:
+          - database
+        artifacts:
+          - coverage/**
+        script:
+          - date
+          - export APP_ENV=test
+          - export DATABASE_URL="postgresql://app_test:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
+          - echo 'memory_limit = 1024M' >> /etc/php.d/memory_limit.ini;
+          - dnf install -y php-pecl-redis5 php-pecl-decimal
+          - export COMPOSER_ALLOW_SUPERUSER=1 #allow composer plugins when running as root as is done during pipeline step
+          - composer config --global bitbucket-oauth.bitbucket.org "${MOCHADOCS_CONSUMER_KEY}" "${MOCHADOCS_CONSUMER_SECRET}"
+          - composer install
+          - php bin/console doctrine:schema:create
+          - php bin/console doctrine:fixtures:load -n --group=test
+          - php bin/phpunit --configuration phpunit.xml.dist --testsuite main #--coverage-clover=coverage/coverage-report.clover
+          - php bin/console doctrine:fixtures:load -n --group=AuthorizationContractTest
+          - php bin/phpunit --configuration phpunit.xml.dist --testsuite hierarchy #--coverage-clover=coverage/coverage-report.clover
+          #- ls -ltah coverage
+    - step: &analyze-sonarcloud
+        name: Analyze on SonarCloud
+        caches:
+          - sonar
+        script:
+          - docker info
+          - pipe: sonarsource/sonarcloud-scan:2.0.0
+            variables:
+              SONAR_TOKEN: ${SONAR_TOKEN}
+              SONAR_SCANNER_OPTS: -Xmx2048m
+              DEBUG: "true"
+    - step: &check-quality-gate-sonarcloud
+        name: Check the Quality Gate on SonarCloud
+        script:
+          - docker info
+          - pipe: sonarsource/sonarcloud-quality-gate:0.1.6
+            variables:
+              SONAR_TOKEN: ${SONAR_TOKEN}
+
+pipelines: # More info here: https://confluence.atlassian.com/bitbucket/configure-bitbucket-pipelines-yml-792298910.html
+  custom:
+    unittest:
+      - step: *analyze-sonarcloud
+      - step: *check-quality-gate-sonarcloud
+    sonarcloud:
+      - step: *analyze-sonarcloud
+      - step: *check-quality-gate-sonarcloud
+  pull-requests:
+    '**':
+      - step: *analyze-sonarcloud
+      - step: *check-quality-gate-sonarcloud
+  branches:
+    development:
+      - step: *analyze-sonarcloud
+      - step: *check-quality-gate-sonarcloud
+

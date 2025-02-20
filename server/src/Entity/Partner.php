@@ -31,12 +31,15 @@ abstract class Partner implements IDable
     #[ORM\Column(length: 255)]
     private string $name;
 
-    #[Groups(['read', 'client:read'])]
+    #[Groups(['read'])]
     #[ORM\Column(length: 255)]
     private string $email;
 
     #[ORM\OneToMany(targetEntity: Client::class, mappedBy: "partner")]
     private Collection $clients;
+
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: "partner")]
+    private Collection $users;
 
     /**
      * @param string $name
@@ -47,6 +50,7 @@ abstract class Partner implements IDable
         $this->name = $name;
         $this->email = $email;
         $this->clients = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getName(): string
@@ -63,5 +67,11 @@ abstract class Partner implements IDable
     public function getClients(): array
     {
         return $this->clients->toArray();
+    }
+
+    #[Groups(['read'])]
+    public function getUsers(): array
+    {
+        return $this->users->toArray();
     }
 }
