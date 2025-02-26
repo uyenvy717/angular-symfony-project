@@ -2,7 +2,13 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\AffiliatePartnerRepository;
 use App\Traits\GeneralPartnerTrait;
 use DateTimeInterface;
@@ -11,8 +17,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AffiliatePartnerRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['read']],
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(
+            denormalizationContext: ['groups' => ['post']]
+        ),
+        new Patch(
+            denormalizationContext: ['groups' => ['patch']]
+        ),
+        new Delete()
+    ],
+    normalizationContext: ['groups' => ['read']]
 )]
 class AffiliatePartner extends Partner
 {
@@ -20,6 +36,7 @@ class AffiliatePartner extends Partner
 
     #[ORM\ManyToOne(targetEntity: GrowthPartner::class, inversedBy: "affiliatePartners")]
     #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(readableLink: false, writableLink: false)]
     private ?GrowthPartner $registeredPartner;
 
     /**
@@ -41,6 +58,7 @@ class AffiliatePartner extends Partner
         $this->renewalInterval = $renewalInterval;
     }
 
+    #[Groups(['post', 'patch'])]
     public function setRegisteredPartner(?GrowthPartner $partner): void
     {
         $this->registeredPartner = $partner;
@@ -50,5 +68,25 @@ class AffiliatePartner extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
+    }
+
+    public function setContactPerson(?string $contactPerson): void
+    {
+        $this->contactPerson = $contactPerson;
+    }
+
+    public function setEndDate(?DateTimeInterface $endDate): void
+    {
+        $this->endDate = $endDate;
+    }
+
+    public function setRenewalInterval(?int $renewalInterval): void
+    {
+        $this->renewalInterval = $renewalInterval;
+    }
+
+    public function setStartDate(DateTimeInterface $startDate): void
+    {
+        $this->startDate = $startDate;
     }
 }

@@ -3,6 +3,11 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\GrowthPartnerRepository;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,32 +18,42 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: GrowthPartnerRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['write']],
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(
+            denormalizationContext: ['groups' => ['post']]
+        ),
+        new Patch(
+            denormalizationContext: ['groups' => ['patch']]
+        ),
+        new Delete()
+    ],
+    normalizationContext: ['groups' => ['read']]
 )]
 class GrowthPartner extends Partner
 {
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contactPerson;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private DateTimeInterface $startDate;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $endDate;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: SolutionPartner::class, mappedBy: 'registeredPartner')]
     private Collection $solutionPartners;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: SolutionProvider::class, mappedBy: 'registeredPartner')]
     private Collection $solutionProviders;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: AffiliatePartner::class, mappedBy: 'registeredPartner')]
     private Collection $affiliatePartners;
 

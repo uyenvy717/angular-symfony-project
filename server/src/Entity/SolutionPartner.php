@@ -2,7 +2,13 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\SolutionPartnerRepository;
 use App\Traits\GeneralPartnerTrait;
 use DateTimeInterface;
@@ -11,8 +17,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SolutionPartnerRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['read']],
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(
+            denormalizationContext: ['groups' => ['post']]
+        ),
+        new Patch(
+            denormalizationContext: ['groups' => ['patch']]
+        ),
+        new Delete()
+    ],
+    normalizationContext: ['groups' => ['read']]
 )]
 class SolutionPartner extends Partner
 {
@@ -20,6 +36,7 @@ class SolutionPartner extends Partner
 
     #[ORM\ManyToOne(targetEntity: GrowthPartner::class, inversedBy: "solutionPartners")]
     #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(readableLink: false, writableLink: false)]
     private ?GrowthPartner $registeredPartner;
 
     /**
@@ -41,6 +58,7 @@ class SolutionPartner extends Partner
         $this->renewalInterval = $renewalInterval;
     }
 
+    #[Groups(['post', 'patch'])]
     public function setRegisteredPartner(?GrowthPartner $partner): void
     {
         $this->registeredPartner = $partner;

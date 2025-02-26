@@ -9,19 +9,19 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 trait GeneralPartnerTrait
 {
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contactPerson = null;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private DateTimeInterface $startDate;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $endDate = null;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(nullable: true)]
     private ?int $renewalInterval = null;
 

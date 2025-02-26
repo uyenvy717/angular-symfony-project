@@ -30,7 +30,7 @@ class ClientTest extends ApiTestCase
     public function testGetClients(): void
     {
         $client = static::createClient();
-        $response = $client->request('GET', '/api/clients');
+        $client->request('GET', '/api/clients');
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
 
