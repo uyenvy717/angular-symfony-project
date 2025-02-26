@@ -25,6 +25,26 @@ trait GeneralPartnerTrait
     #[ORM\Column(nullable: true)]
     private ?int $renewalInterval = null;
 
+    public function setContactPerson(?string $contactPerson): void
+    {
+        $this->contactPerson = $contactPerson;
+    }
+
+    public function setStartDate(DateTimeInterface $startDate): void
+    {
+        $this->startDate = $startDate;
+    }
+
+    public function setEndDate(?DateTimeInterface $endDate): void
+    {
+        $this->endDate = $endDate;
+    }
+
+    public function setRenewalInterval(?int $renewalInterval): void
+    {
+        $this->renewalInterval = $renewalInterval;
+    }
+
     public function getContactPerson(): ?string
     {
         return $this->contactPerson;

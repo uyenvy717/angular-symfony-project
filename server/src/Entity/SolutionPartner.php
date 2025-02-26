@@ -48,7 +48,15 @@ class SolutionPartner extends Partner
      * @param DateTimeInterface|null $endDate
      * @param int|null $renewalInterval
      */
-    public function __construct(string $name, string $email, ?GrowthPartner $registeredPartner, ?string $contactPerson, DateTimeInterface $startDate, ?DateTimeInterface $endDate, ?int $renewalInterval)
+    public function __construct(
+        string $name,
+        string $email,
+        ?GrowthPartner $registeredPartner,
+        ?string $contactPerson,
+        DateTimeInterface $startDate,
+        ?DateTimeInterface $endDate,
+        ?int $renewalInterval
+    )
     {
         parent::__construct($name, $email);
         $this->registeredPartner = $registeredPartner;

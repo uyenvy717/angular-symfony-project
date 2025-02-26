@@ -63,11 +63,6 @@ abstract class Partner implements IDable
         $this->name = $name;
     }
 
-    public function setEmail(string $email): void
-    {
-        $this->email = $email;
-    }
-
     public function getEmail(): string
     {
         return $this->email;

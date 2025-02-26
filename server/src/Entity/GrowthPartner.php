@@ -75,6 +75,21 @@ class GrowthPartner extends Partner
         $this->affiliatePartners = new ArrayCollection();
     }
 
+    public function setContactPerson(?string $contactPerson): void
+    {
+        $this->contactPerson = $contactPerson;
+    }
+
+    public function setStartDate(DateTimeInterface $startDate): void
+    {
+        $this->startDate = $startDate;
+    }
+
+    public function setEndDate(?DateTimeInterface $endDate): void
+    {
+        $this->endDate = $endDate;
+    }
+
     public function getContactPerson(): ?string
     {
         return $this->contactPerson;

@@ -48,7 +48,15 @@ class AffiliatePartner extends Partner
      * @param DateTimeInterface|null $endDate
      * @param int|null $renewalInterval
      */
-    public function __construct(string $name, string $email, ?GrowthPartner $registeredPartner, ?string $contactPerson, DateTimeInterface $startDate, ?DateTimeInterface $endDate, ?int $renewalInterval)
+    public function __construct(
+        string $name,
+        string $email,
+        ?GrowthPartner $registeredPartner,
+        ?string $contactPerson,
+        DateTimeInterface $startDate,
+        ?DateTimeInterface $endDate,
+        ?int $renewalInterval
+    )
     {
         parent::__construct($name, $email);
         $this->registeredPartner = $registeredPartner;
@@ -68,25 +76,5 @@ class AffiliatePartner extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
-    }
-
-    public function setContactPerson(?string $contactPerson): void
-    {
-        $this->contactPerson = $contactPerson;
-    }
-
-    public function setEndDate(?DateTimeInterface $endDate): void
-    {
-        $this->endDate = $endDate;
-    }
-
-    public function setRenewalInterval(?int $renewalInterval): void
-    {
-        $this->renewalInterval = $renewalInterval;
-    }
-
-    public function setStartDate(DateTimeInterface $startDate): void
-    {
-        $this->startDate = $startDate;
     }
 }
