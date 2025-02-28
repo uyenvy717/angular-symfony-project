@@ -15,6 +15,9 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -25,14 +28,19 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new GetCollection(),
         new Post(
             denormalizationContext: ['groups' => ['user:post']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())"
         ),
         new Patch(
             denormalizationContext: ['groups' => ['user:patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or ('ROLE_SUPER_ADMIN' not in object.getRoles() and is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
         new Delete()
     ]
 )]
-class User implements IDable
+class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
 {
     use IDScheme;
     #[ORM\Column]
@@ -43,6 +51,13 @@ class User implements IDable
 
     #[ORM\Column(length: 255)]
     private string $email;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(type: 'string')]
+    private string $password;
+
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $lastLoggedIn;
@@ -70,7 +85,7 @@ class User implements IDable
         return $this->isActive;
     }
 
-    public function getEmail(): string
+    public function getUserIdentifier(): string
     {
         return $this->email;
     }
@@ -78,6 +93,25 @@ class User implements IDable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 
     public function getLastLoggedIn(): ?DateTimeInterface
@@ -118,4 +152,24 @@ class User implements IDable
     {
         $this->partner = $partner;
     }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+//
+//    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+//    {
+//        // TODO: Implement upgradePassword() method.
+//    }
 }

@@ -21,10 +21,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(),
         new GetCollection(),
         new Post(
-            denormalizationContext: ['groups' => ['post']]
+            denormalizationContext: ['groups' => ['post']],
+            security: "is_granted('ROLE_SUPER_ADMIN')"
         ),
         new Patch(
-            denormalizationContext: ['groups' => ['patch']]
+            denormalizationContext: ['groups' => ['patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
         ),
         new Delete()
     ],
@@ -70,6 +72,11 @@ class SolutionPartner extends Partner
     public function setRegisteredPartner(?GrowthPartner $partner): void
     {
         $this->registeredPartner = $partner;
+    }
+
+    public function getRegisteredPartner(): ?GrowthPartner
+    {
+        return $this->registeredPartner;
     }
 
     #[Groups(['read'])]

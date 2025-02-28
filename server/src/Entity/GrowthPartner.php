@@ -22,10 +22,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(),
         new GetCollection(),
         new Post(
-            denormalizationContext: ['groups' => ['post']]
+            denormalizationContext: ['groups' => ['post']],
+            security: "is_granted('ROLE_SUPER_ADMIN')"
         ),
         new Patch(
-            denormalizationContext: ['groups' => ['patch']]
+            denormalizationContext: ['groups' => ['patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN')"
         ),
         new Delete()
     ],
@@ -121,5 +123,10 @@ class GrowthPartner extends Partner
     public function getAffiliatePartners(): Collection
     {
         return $this->affiliatePartners;
+    }
+
+    public function getRegisteredPartner()
+    {
+        return null;
     }
 }
