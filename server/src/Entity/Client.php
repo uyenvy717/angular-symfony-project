@@ -23,15 +23,22 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(),
         new GetCollection(),
         new Post(
-          denormalizationContext: ['groups' => ['client:post']],
-          security: "is_granted('ROLE_SUPER_ADMIN')
+            denormalizationContext: ['groups' => ['client:post']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
                 or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())"
         ),
         new Patch(
-          denormalizationContext: ['groups' => ['client:patch']],
-          security: "is_granted('ROLE_SUPER_ADMIN')
-                or ('ROLE_SUPER_ADMIN' not in object.getRoles() and is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+            denormalizationContext: ['groups' => ['client:patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner() == user.getPartner()
                 or object.getPartner().getRegisteredPartner()  == user.getPartner()"
+        ),
+        new Patch(
+            uriTemplate: '/clients/{id}/registeredPartner',
+            denormalizationContext: ['groups' => ['client:patch:assignPartner']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner().getRegisteredPartner()  == user.getPartner()",
+            securityPostDenormalize: "object.getPartner().getRegisteredPartner() == user.getPartner()"
         ),
         new Delete()
     ],
@@ -91,7 +98,7 @@ class Client implements IDable
         $this->isActive = $isActive;
     }
 
-    #[Groups(['client:patch', 'client:post'])]
+    #[Groups(['client:patch:assignPartner', 'client:post'])]
     public function setPartner(?Partner $partner): void
     {
         $this->partner = $partner;

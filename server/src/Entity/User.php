@@ -147,8 +147,8 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         $this->lastLoggedIn = $lastLoggedIn;
     }
 
-    #[Groups(['user:post', 'user:patch'])]
-    public function setPartner(?Partner $partner): void
+    #[Groups(['user:post'])]
+    public function setPartner(Partner $partner): void
     {
         $this->partner = $partner;
     }
@@ -167,9 +167,4 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->password;
     }
-//
-//    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
-//    {
-//        // TODO: Implement upgradePassword() method.
-//    }
 }
