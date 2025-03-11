@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
@@ -22,16 +21,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(),
         new GetCollection(),
         new Post(
-            denormalizationContext: ['groups' => ['post']],
-            security: "is_granted('ROLE_SUPER_ADMIN')"
+            denormalizationContext: ['groups' => ['post']]
         ),
         new Patch(
-            denormalizationContext: ['groups' => ['patch']],
-            security: "is_granted('ROLE_SUPER_ADMIN')"
+            denormalizationContext: ['groups' => ['patch']]
         ),
-        new Delete()
     ],
-    normalizationContext: ['groups' => ['read']]
+    normalizationContext: ['groups' => ['read']],
+    security: "is_granted('ROLE_SUPER_ADMIN')"
 )]
 class GrowthPartner extends Partner
 {

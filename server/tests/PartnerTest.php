@@ -2,39 +2,34 @@
 
 namespace App\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\DataFixtures\AppFixtures;
 use App\Entity\AffiliatePartner;
 use App\Entity\GrowthPartner;
 use App\Entity\SolutionPartner;
 use App\Entity\SolutionProvider;
+use App\Repository\GrowthPartnerRepository;
 use App\Repository\PartnerRepository;
 use Carbon\Carbon;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\ORM\EntityManagerInterface;
 
-class PartnerTest extends APITestCase
+class PartnerTest extends AbstractTest
 {
-    protected function setUp(): void
-    {
-        self::bootKernel();
-        $container = static::getContainer();
-        $entityManager = $container->get(EntityManagerInterface::class);
+    private array $body = [
+        'email' => 'admin@user',
+        'password' => 'testpassword',
+    ];
 
-        $purger = new ORMPurger($entityManager);
-        $purger->purge();
-
-        // Load fixtures
-        $fixtureLoader = $container->get(AppFixtures::class);
-        $fixtureLoader->load($entityManager);
-        $entityManager->flush();
-    }
-
+    // Partners cannot retrieve the growth partner
     public function testGetGrowthPartner()
     {
-        $client = static::createClient();
+        // Other partners cannot retrieve growth partners
+        $this->createClientWithCredentials()->request('GET', '/api/growth_partners');
+        $this->assertResponseStatusCodeSame(403);
+    }
 
-        $client->request('GET', '/api/growth_partners');
+    // Only top-level account can get growth partners
+    public function testGetGrowthPartners()
+    {
+        $this->createClientWithCredentials(null, $this->body)->request('GET', '/api/growth_partners');
+
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
 
@@ -48,9 +43,9 @@ class PartnerTest extends APITestCase
         $this->assertMatchesResourceItemJsonSchema(GrowthPartner::class);
     }
 
+    // Only top-level
     public function testCreateGrowthPartner()
     {
-        $client = static::createClient();
         $payload = [
             'contactPerson' => null,
             'startDate' => Carbon::now(),
@@ -59,18 +54,19 @@ class PartnerTest extends APITestCase
             'email' => 'growth@partner.com',
         ];
 
-        $client->request('POST', '/api/growth_partners', [
+        $this->createClientWithCredentials(null, $this->body)->request('POST', '/api/growth_partners', [
             'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
             'json' => $payload,
         ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(201);
+        $this->assertMatchesResourceItemJsonSchema(GrowthPartner::class);
     }
 
+    // Only top-level
     public function testUpdateGrowthPartner()
     {
-        $client = static::createClient();
         $payload = [
             'contactPerson' => 'testUpdate',
             'email' => 'testUpdate@partner.com',
@@ -80,7 +76,7 @@ class PartnerTest extends APITestCase
         $growthPartner = $partnerRepository->findOneBy(['name' => 'growth']);
         $growthPartnerId = $growthPartner->getId();
 
-        $response = $client->request('PATCH', '/api/growth_partners/'.$growthPartnerId, [
+        $response = $this->createClientWithCredentials(null, $this->body)->request('PATCH', '/api/growth_partners/'.$growthPartnerId, [
             'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
             'json' => $payload,
         ]);
@@ -98,11 +94,27 @@ class PartnerTest extends APITestCase
         );
     }
 
+    // Growth partner get solution partners in the scope
     public function testGetSolutionPartner()
     {
-        $client = static::createClient();
+        $this->createClientWithCredentials()->request('GET', '/api/solution_partners');
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
 
-        $client->request('GET', '/api/solution_partners');
+        $this->assertJsonContains([
+            '@context' => '/api/contexts/SolutionPartner',
+            '@id' => '/api/solution_partners',
+            '@type' => 'Collection',
+            'totalItems' => 1
+        ]);
+
+        $this->assertMatchesResourceItemJsonSchema(SolutionPartner::class);
+    }
+
+    // Top-level account can get all solution partners
+    public function testGetAllSolutionPartners()
+    {
+        $this->createClientWithCredentials(null, $this->body)->request('GET', '/api/solution_partners');
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
 
@@ -116,9 +128,9 @@ class PartnerTest extends APITestCase
         $this->assertMatchesResourceItemJsonSchema(SolutionPartner::class);
     }
 
+    // Growth partner can create a solution partner in scope
     public function testCreateSolutionPartner()
     {
-        $client = static::createClient();
         $payload = [
             'registeredPartner' => null,
             'contactPerson' => null,
@@ -129,29 +141,75 @@ class PartnerTest extends APITestCase
             'email' => 'solution@partner.com',
         ];
 
-         $client->request('POST', '/api/solution_partners', [
+         $this->createClientWithCredentials()->request('POST', '/api/solution_partners', [
             'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
             'json' => $payload,
         ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(201);
-    }
+        $this->assertMatchesResourceItemJsonSchema(SolutionPartner::class);
 
-    public function testUpdateSolutionPartner()
-    {
-        $client = static::createClient();
-
-        $partnerRepository = static::getContainer()->get(PartnerRepository::class);
-        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth2'])->getId();
-        $solutionPartner = $partnerRepository->findOneBy(['name' => 'solutionPartner']);
+        // Cannot create a solution partner out of the scope
+        $growthPartnerRepository = $this->getContainer()->get(GrowthPartnerRepository::class);
+        $growthPartnerId = $growthPartnerRepository->findOneBy(['name' => 'growth2'])->getId();
 
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
-            'email' => 'testUpdate@partner.com',
+            'contactPerson' => null,
+            'startDate' => Carbon::now(),
+            'endDate' => null,
+            'renewalInterval' => null,
+            'name' => 'solutionPartnerTest',
+            'email' => 'solution@partner.com',
         ];
 
-        $response = $client->request('PATCH', '/api/solution_partners/'.$solutionPartner->getId(), [
+        $this->createClientWithCredentials()->request('POST', '/api/solution_partners', [
+            'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
+            'json' => $payload,
+        ]);
+
+        $this->assertResponseStatusCodeSame(403);
+    }
+
+    // Top-level account can create a solution partner under any growth partner
+    public function testCreateAnySolutionPartner()
+    {
+        $growthPartnerRepository = $this->getContainer()->get(GrowthPartnerRepository::class);
+        $growthPartnerId = $growthPartnerRepository->findOneBy(['name' => 'growth2'])->getId();
+
+        $payload = [
+            'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
+            'contactPerson' => null,
+            'startDate' => Carbon::now(),
+            'endDate' => null,
+            'renewalInterval' => null,
+            'name' => 'solutionPartnerTest',
+            'email' => 'solution@partner.com',
+        ];
+
+        $this->createClientWithCredentials(null, $this->body)->request('POST', '/api/solution_partners', [
+            'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
+            'json' => $payload,
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertMatchesResourceItemJsonSchema(SolutionPartner::class);
+    }
+
+    // Growth partner can update solution partner's information in scope
+    public function testUpdateSolutionPartner()
+    {
+        $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
+        $solutionPartner = $partnerRepository->findOneBy(['name' => 'solutionPartner']);
+
+        $payload = [
+            'contactPerson' => 'testPerson',
+            'email' => 'testUpdate@partner.com'
+        ];
+
+        $response = $this->createClientWithCredentials()->request('PATCH', '/api/solution_partners/'.$solutionPartner->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
             'json' => $payload,
         ]);
@@ -167,25 +225,38 @@ class PartnerTest extends APITestCase
             $content['email'],
             "The email should not be updated"
         );
+
+        // Cannot assign the solution partner to other growth partner
+        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth2'])->getId();
+        $payload = [
+            'registeredPartner' => '/api/growth_partners/'.$growthPartnerId
+        ];
+
+        $this->createClientWithCredentials()->request('PATCH', '/api/solution_partners/'.$solutionPartner->getId(), [
+            'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
+            'json' => $payload,
+        ]);
+
+        $this->assertResponseStatusCodeSame(403);
     }
 
+    // Growth partner can get the solution provider in scope
     public function testGetSolutionProvider()
     {
-        $client = static::createClient();
-
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
         $partnerId = $partnerRepository->findOneBy(['name' => 'solutionProvider'])->getId();
 
-        $client->request('GET', '/api/solution_providers/'.$partnerId);
+        $this->createClientWithCredentials()->request('GET', '/api/solution_providers/'.$partnerId);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
         $this->assertMatchesResourceItemJsonSchema(SolutionProvider::class);
     }
 
-    public function testCreateSolutionProvider()
+    // Growth partner can create and update a solution provider in scope
+    public function testCreateUpdateSolutionProvider()
     {
-        $client = static::createClient();
+        // Create a new solution provider
         $payload = [
             'registeredPartner' => null,
             'contactPerson' => null,
@@ -196,27 +267,25 @@ class PartnerTest extends APITestCase
             'email' => 'solution@provider.com',
         ];
 
-        $client->request('POST', '/api/solution_providers', [
+        $this->createClientWithCredentials()->request('POST', '/api/solution_providers', [
             'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
             'json' => $payload,
         ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(201);
-    }
+        $this->assertMatchesResourceItemJsonSchema(SolutionProvider::class);
 
-    public function testUpdateSolutionProvider()
-    {
-        $client = static::createClient();
-        $partnerRepository = static::getContainer()->get(PartnerRepository::class);
-        $solutionProviderId = $partnerRepository->findOneBy(['name' => 'solutionProvider'])->getId();
+        // Update the solution provider
+        $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
+        $solutionProviderId = $partnerRepository->findOneBy(['name' => 'solutionProviderTest'])->getId();
+        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth'])->getId();
 
         $payload = [
-            'endDate' => Carbon::tomorrow(),
-            'renewalInterval' => null,
+            'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
         ];
 
-        $client->request('PATCH', '/api/solution_providers/'.$solutionProviderId, [
+        $this->createClientWithCredentials()->request('PATCH', '/api/solution_providers/'.$solutionProviderId, [
             'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
             'json' => $payload,
         ]);
@@ -226,23 +295,21 @@ class PartnerTest extends APITestCase
         $this->assertMatchesResourceItemJsonSchema(SolutionProvider::class);
     }
 
+    // Growth partner cannot get the affiliate partner out of scope
     public function testGetAffiliatePartner()
     {
-        $client = static::createClient();
-
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
         $partnerId = $partnerRepository->findOneBy(['name' => 'affiliatePartner'])->getId();
 
-        $client->request('GET', '/api/affiliate_partners/'.$partnerId);
+        $this->createClientWithCredentials()->request('GET', '/api/affiliate_partners/'.$partnerId);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceItemJsonSchema(AffiliatePartner::class);
+        $this->assertResponseStatusCodeSame(403);
     }
 
+    // Growth partner can create and update an affiliate partner in scope
     public function testCreateAffiliatePartner()
     {
-        $client = static::createClient();
+        // Create a new affiliate partner
         $payload = [
             'registeredPartner' => null,
             'contactPerson' => null,
@@ -253,26 +320,24 @@ class PartnerTest extends APITestCase
             'email' => 'affiliate@partner.com',
         ];
 
-        $client->request('POST', '/api/affiliate_partners', [
+        $this->createClientWithCredentials()->request('POST', '/api/affiliate_partners', [
             'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
             'json' => $payload,
         ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(201);
-    }
 
-    public function testUpdateAffiliatePartner()
-    {
-        $client = static::createClient();
-        $partnerRepository = static::getContainer()->get(PartnerRepository::class);
-        $affiliatePartnerId = $partnerRepository->findOneBy(['name' => 'affiliatePartner'])->getId();
+        // Update the affiliate partner
+        $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
+        $affiliatePartnerId = $partnerRepository->findOneBy(['name' => 'affiliatePartnerTest'])->getId();
+        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth'])->getId();
 
         $payload = [
-            'startDate' => Carbon::now(),
+            'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
         ];
 
-        $client->request('PATCH', '/api/affiliate_partners/'.$affiliatePartnerId, [
+        $this->createClientWithCredentials()->request('PATCH', '/api/affiliate_partners/'.$affiliatePartnerId, [
             'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
             'json' => $payload,
         ]);

@@ -86,7 +86,7 @@
         }
     },
     "require-dev": {
-        "dama/doctrine-test-bundle": "^8.2.2",
+        "dama/doctrine-test-bundle": "^8.2",
         "doctrine/doctrine-fixtures-bundle": "^4.0",
         "justinrainbow/json-schema": "^6.1",
         "phpunit/phpunit": "^9.6.22",

@@ -4,12 +4,12 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\AffiliatePartnerRepository;
+use App\State\PartnerProvider;
 use App\Traits\GeneralPartnerTrait;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,17 +18,23 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: AffiliatePartnerRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
+        ),
+        new GetCollection(
+            provider: PartnerProvider::class
+        ),
         new Post(
             denormalizationContext: ['groups' => ['post']],
-            security: "is_granted('ROLE_SUPER_ADMIN')"
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
         ),
         new Patch(
             denormalizationContext: ['groups' => ['patch']],
-            security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
-        ),
-        new Delete()
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null",
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
+        )
     ],
     normalizationContext: ['groups' => ['read']]
 )]

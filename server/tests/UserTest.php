@@ -2,35 +2,22 @@
 
 namespace App\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\DataFixtures\AppFixtures;
 use App\Entity\User;
 use App\Repository\PartnerRepository;
 use App\Repository\UserRepository;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserTest extends ApiTestCase
+class UserTest extends AbstractTest
 {
-    protected function setUp(): void
-    {
-        self::bootKernel();
-        $container = static::getContainer();
-        $entityManager = $container->get(EntityManagerInterface::class);
+    private array $body = [
+        'email' => 'admin@user',
+        'password' => 'testpassword',
+    ];
 
-        $purger = new ORMPurger($entityManager);
-        $purger->purge();
-
-        // Load fixtures
-        $fixtureLoader = $container->get(AppFixtures::class);
-        $fixtureLoader->load($entityManager);
-        $entityManager->flush();
-    }
-
+    // Growth partner get users
     public function testGetUsers(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/api/users');
+        $this->createClientWithCredentials()->request('GET', '/api/users');
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
@@ -39,26 +26,49 @@ class UserTest extends ApiTestCase
             '@context' => '/api/contexts/User',
             '@id' => '/api/users',
             '@type' => 'Collection',
-            'totalItems' => 3
+            'totalItems' => 5
         ]);
 
         $this->assertMatchesResourceItemJsonSchema(User::class);
     }
 
+    // Top-level account get all users
+    public function testGetAllUser(): void
+    {
+        $this->createClientWithCredentials(null, $this->body)->request('GET', '/api/users');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertJsonContains([
+            '@context' => '/api/contexts/User',
+            '@id' => '/api/users',
+            '@type' => 'Collection',
+            'totalItems' => 8
+        ]);
+
+        $this->assertMatchesResourceItemJsonSchema(User::class);
+    }
+
+    // Growth partner create user in scope
     public function testCreateUser(): void
     {
-        $client = static::createClient();
-
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
-        $partnerId = $partnerRepository->findOneBy(['name' => 'solutionPartner'])->getId();
+        $passwordHasher = $this->getContainer()->get(UserPasswordHasherInterface::class);
+
+        $partner = $partnerRepository->findOneBy(['name' => 'solutionPartner']);
+
+        // Hash the password before sending it in the request
+        $hashedPassword = $passwordHasher->hashPassword(new User('Test User', 'test@user.com', $partner), 'password123');
 
         $payload = [
             'name' => 'Test User',
             'email' => 'test@user.com',
-            'partner' => '/api/solution_partners/'.$partnerId,
+            'password' => $hashedPassword,
+            'partner' => '/api/solution_partners/'.$partner->getId(),
         ];
 
-        $client->request('POST', '/api/users', [
+        $this->createClientWithCredentials()->request('POST', '/api/users', [
             'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
             'json' => $payload
         ]);
@@ -69,44 +79,76 @@ class UserTest extends ApiTestCase
         $this->assertMatchesResourceItemJsonSchema(User::class);
     }
 
-    public function testUpdateClient(): void
+    // Top-level account can create user for any partner?
+    public function testCreateAnyUser(): void
     {
-        $client = static::createClient();
-
-        $userRepository = $this->getContainer()->get(UserRepository::class);
-        $userId = $userRepository->findOneBy(['name' => 'gpUser'])->getId();
-
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
-        $partnerId = $partnerRepository->findOneBy(['name' => 'solutionPartner'])->getId();
+        $passwordHasher = $this->getContainer()->get(UserPasswordHasherInterface::class);
+
+        $partner = $partnerRepository->findOneBy(['name' => 'solutionPartner2']);
+
+        // Hash the password before sending it in the request
+        $hashedPassword = $passwordHasher->hashPassword(new User('Test User', 'test@user.com', $partner), 'password123');
+
+        $payload = [
+            'name' => 'Test User',
+            'email' => 'test@user.com',
+            'password' => $hashedPassword,
+            'partner' => '/api/solution_partners/'.$partner->getId(),
+        ];
+
+        $this->createClientWithCredentials(null, $this->body)->request('POST', '/api/users', [
+            'headers' => ['Content-Type' => 'application/ld+json; charset=utf-8'],
+            'json' => $payload
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(201);
+
+        $this->assertMatchesResourceItemJsonSchema(User::class);
+    }
+
+    // Growth partner cannot update the user's information out of the scope
+    public function testUpdateUser(): void
+    {
+        $userRepository = $this->getContainer()->get(UserRepository::class);
+        $userId = $userRepository->findOneBy(['name' => 'aUser'])->getId();
 
         $payload = [
             'isActive' => true,
             'name' => 'Test User',
-            'partner' => '/api/solution_partners/'.$partnerId,
         ];
 
-        $response = $client->request('PATCH', '/api/users/'.$userId, [
+        $response = $this->createClientWithCredentials()->request('PATCH', '/api/users/'.$userId, [
             'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
             'json' => $payload
         ]);
-        $content = json_decode($response->getContent(), true);
-        $emailOfUser = $content['email'];
+
+        $this->assertJsonContains([
+            'title' => 'An error occurred',
+            'description' => 'Access Denied.'
+        ]);
+        $this->assertResponseStatusCodeSame(403);
+    }
+
+    // Top-level account can update any user
+    public function testUpdateAnyUser(): void
+    {
+        $userRepository = $this->getContainer()->get(UserRepository::class);
+        $userId = $userRepository->findOneBy(['name' => 'gpUser2'])->getId();
+
+        $payload = [
+            'isActive' => true,
+            'name' => 'Test User',
+        ];
+
+        $response = $this->createClientWithCredentials(null, $this->body)->request('PATCH', '/api/users/'.$userId, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
+            'json' => $payload
+        ]);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
         $this->assertMatchesResourceItemJsonSchema(User::class);
-
-        // Cannot update the email
-        $payload = [
-            'email' => 'test@user.com',
-        ];
-
-        $response = $client->request('PATCH', '/api/users/'.$userId, [
-           'headers' => ['Content-Type' => 'application/merge-patch+json; charset=utf-8'],
-            'json' => $payload
-        ]);
-        $content = json_decode($response->getContent(), true);
-
-        $this->assertEquals($emailOfUser, $content['email'], 'The user email would not change.');
     }
 }

@@ -77,7 +77,7 @@ class AppFixtures extends Fixture
         $user4->setRoles(['ROLE_ADMIN']);
         $manager->persist($user4);
 
-        $user5 = new User("spaUser", "spa@user", $solutionPartner2);
+        $user5 = new User("spaUser2", "spa2@user", $solutionPartner2);
         $hashedPassword = $this->passwordHasher->hashPassword($user5, 'testpassword2');
         $user5->setPassword($hashedPassword);
         $user5->setRoles(['ROLE_ADMIN']);
@@ -95,7 +95,7 @@ class AppFixtures extends Fixture
         $user7->setRoles(['ROLE_SUPER_ADMIN']);
         $manager->persist($user7);
 
-        $user8 = new User("sprUser", "spr@user", $solutionProvider);
+        $user8 = new User("sprUser2", "spr2@user", $solutionProvider);
         $hashedPassword = $this->passwordHasher->hashPassword($user8, 'testpassword3');
         $user8->setPassword($hashedPassword);
         $user8->setRoles(['ROLE_USER']);

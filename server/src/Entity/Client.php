@@ -3,13 +3,13 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
 use App\Repository\ClientRepository;
+use App\State\ClientProvider;
 use App\Traits\IDScheme;
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -20,12 +20,19 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner() == user.getPartner()
+                or object.getPartner().getRegisteredPartner() == user.getPartner()"
+        ),
+        new GetCollection(
+            provider: ClientProvider::class
+        ),
         new Post(
             denormalizationContext: ['groups' => ['client:post']],
-            security: "is_granted('ROLE_SUPER_ADMIN')
-                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())"
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner() == user.getPartner()"
         ),
         new Patch(
             denormalizationContext: ['groups' => ['client:patch']],
@@ -37,10 +44,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
             uriTemplate: '/clients/{id}/registeredPartner',
             denormalizationContext: ['groups' => ['client:patch:assignPartner']],
             security: "is_granted('ROLE_SUPER_ADMIN')
-                or object.getPartner().getRegisteredPartner()  == user.getPartner()",
-            securityPostDenormalize: "object.getPartner().getRegisteredPartner() == user.getPartner()"
+                or object.getPartner().getRegisteredPartner()  == user.getPartner()
+                or object.getPartner() == user.getPartner()",
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner().getRegisteredPartner() == user.getPartner()
+                or object.getPartner() == user.getPartner()"
         ),
-        new Delete()
     ],
     normalizationContext: ['groups' => ['client:read']]
 )]

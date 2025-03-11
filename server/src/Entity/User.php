@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
 use App\Repository\UserRepository;
+use App\State\UserProvider;
 use App\Traits\IDScheme;
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -24,20 +25,26 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Table(name: "portal_user")]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner() == user.getPartner()
+                or object.getPartner().getRegisteredPartner() == user.getPartner()"
+        ),
+        new GetCollection(
+            provider: UserProvider::class
+        ),
         new Post(
             denormalizationContext: ['groups' => ['user:post']],
-            security: "is_granted('ROLE_SUPER_ADMIN')
-                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())"
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
         new Patch(
             denormalizationContext: ['groups' => ['user:patch']],
             security: "is_granted('ROLE_SUPER_ADMIN')
-                or ('ROLE_SUPER_ADMIN' not in object.getRoles() and is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
                 or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
-        new Delete()
     ]
 )]
 class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
@@ -153,6 +160,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         $this->partner = $partner;
     }
 
+    #[Groups(['user:post'])]
     public function setPassword(string $password): void
     {
         $this->password = $password;
@@ -160,7 +168,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // TODO: Implement eraseCredentials() method.
+        // Implement eraseCredentials() method.
     }
 
     public function getPassword(): string
