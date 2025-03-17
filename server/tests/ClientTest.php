@@ -5,7 +5,7 @@ namespace App\Tests;
 use App\Entity\Client;
 use App\Repository\ClientRepository;
 use App\Repository\PartnerRepository;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 
 class ClientTest extends AbstractTest
 {
@@ -77,8 +77,8 @@ class ClientTest extends AbstractTest
         $this->assertArrayHasKey('startDate', $content);
 
         $this->assertEquals(
-            Carbon::today(),
-            Carbon::parse($content['startDate']),
+            CarbonImmutable::today(),
+            CarbonImmutable::parse($content['startDate']),
             'The startDate should be set to today’s date when null is provided.'
         );
 

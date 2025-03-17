@@ -8,7 +8,7 @@ use App\Entity\SolutionPartner;
 use App\Entity\SolutionProvider;
 use App\Repository\GrowthPartnerRepository;
 use App\Repository\PartnerRepository;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 
 class PartnerTest extends AbstractTest
 {
@@ -48,7 +48,7 @@ class PartnerTest extends AbstractTest
     {
         $payload = [
             'contactPerson' => null,
-            'startDate' => Carbon::now(),
+            'startDate' => CarbonImmutable::now(),
             'endDate' => null,
             'name' => 'growthPartner',
             'email' => 'growth@partner.com',
@@ -134,7 +134,7 @@ class PartnerTest extends AbstractTest
         $payload = [
             'registeredPartner' => null,
             'contactPerson' => null,
-            'startDate' => Carbon::now(),
+            'startDate' => CarbonImmutable::now(),
             'endDate' => null,
             'renewalInterval' => null,
             'name' => 'solutionPartnerTest',
@@ -157,7 +157,7 @@ class PartnerTest extends AbstractTest
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
             'contactPerson' => null,
-            'startDate' => Carbon::now(),
+            'startDate' => CarbonImmutable::now(),
             'endDate' => null,
             'renewalInterval' => null,
             'name' => 'solutionPartnerTest',
@@ -181,7 +181,7 @@ class PartnerTest extends AbstractTest
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
             'contactPerson' => null,
-            'startDate' => Carbon::now(),
+            'startDate' => CarbonImmutable::now(),
             'endDate' => null,
             'renewalInterval' => null,
             'name' => 'solutionPartnerTest',
@@ -260,7 +260,7 @@ class PartnerTest extends AbstractTest
         $payload = [
             'registeredPartner' => null,
             'contactPerson' => null,
-            'startDate' => Carbon::now(),
+            'startDate' => CarbonImmutable::now(),
             'endDate' => null,
             'renewalInterval' => null,
             'name' => 'solutionProviderTest',
@@ -313,7 +313,7 @@ class PartnerTest extends AbstractTest
         $payload = [
             'registeredPartner' => null,
             'contactPerson' => null,
-            'startDate' => Carbon::now(),
+            'startDate' => CarbonImmutable::now(),
             'endDate' => null,
             'renewalInterval' => null,
             'name' => 'affiliatePartnerTest',

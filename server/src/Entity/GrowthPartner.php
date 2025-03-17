@@ -8,6 +8,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\GrowthPartnerRepository;
+use Carbon\Carbon;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -37,11 +39,11 @@ class GrowthPartner extends Partner
     private ?string $contactPerson;
 
     #[Groups(['read', 'post', 'patch'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private DateTimeInterface $startDate;
 
     #[Groups(['read', 'post', 'patch'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?DateTimeInterface $endDate;
 
     #[Groups(['read', 'patch'])]
@@ -122,7 +124,7 @@ class GrowthPartner extends Partner
         return $this->affiliatePartners;
     }
 
-    public function getRegisteredPartner()
+    public function getRegisteredPartner(): null
     {
         return null;
     }

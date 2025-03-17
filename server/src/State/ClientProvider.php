@@ -5,7 +5,6 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Entity\Client;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -25,27 +24,19 @@ class ClientProvider implements ProviderInterface
     {
         $user = $this->security->getUser();
 
-        if (!$user instanceof User) {
+        if ($user === null) {
             throw new AccessDeniedException('Access Denied.');
         }
 
-        $queryBuilder = $this->entityManager->getRepository(Client::class)->createQueryBuilder('c');
+        // Get the repository for the User entity
+        $clientRepository = $this->entityManager->getRepository(Client::class);
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            $queryBuilder
-                ->where('c.partner = :partner')
-                ->orWhere('c.partner IN (
-                    SELECT a FROM App\Entity\AffiliatePartner a WHERE a.registeredPartner = :partner
-                )')
-                ->orWhere('c.partner IN (
-                    SELECT spa FROM App\Entity\SolutionPartner spa WHERE spa.registeredPartner = :partner
-                )')
-                ->orWhere('c.partner IN (
-                    SELECT spr FROM App\Entity\SolutionProvider spr WHERE spr.registeredPartner = :partner
-                )')
-                ->setParameter('partner', $user->getPartner());
+
+        // If the user is a super admin, just return all clients
+        if ($this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            return $clientRepository->findAll();
+        } else {
+            return $clientRepository->findClientsByPartner($user->getPartner());
         }
-
-        return $queryBuilder->getQuery()->getResult();
     }
 }

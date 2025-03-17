@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Carbon\Carbon;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,11 +16,11 @@ trait GeneralPartnerTrait
     private ?string $contactPerson = null;
 
     #[Groups(['read', 'post', 'patch'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private DateTimeInterface $startDate;
 
     #[Groups(['read', 'post', 'patch'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?DateTimeInterface $endDate = null;
 
     #[Groups(['read', 'post', 'patch'])]

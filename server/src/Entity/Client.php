@@ -11,7 +11,7 @@ use App\Interface\IDable;
 use App\Repository\ClientRepository;
 use App\State\ClientProvider;
 use App\Traits\IDScheme;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -69,7 +69,7 @@ class Client implements IDable
     private string $email;
 
     #[Groups(['client:read', 'client:post'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private DateTimeInterface $startDate;
 
     /**
@@ -92,7 +92,7 @@ class Client implements IDable
         $this->email = $email;
         $this->isActive = $isActive;
         $this->partner = $partner ?? null;
-        $this->startDate = $startDate ?? Carbon::now();
+        $this->startDate = $startDate ?? CarbonImmutable::now();
     }
 
     #[Groups(['client:read'])]

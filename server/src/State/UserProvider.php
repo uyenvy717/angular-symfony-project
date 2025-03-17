@@ -24,27 +24,19 @@ class UserProvider implements ProviderInterface
     {
         $user = $this->security->getUser();
 
-        if (!$user instanceof User) {
+        if ($user === null) {
             throw new AccessDeniedException('Access Denied.');
         }
 
-        $queryBuilder = $this->entityManager->getRepository(User::class)->createQueryBuilder('u');
+        // Get the repository for the User entity
+        $userRepository = $this->entityManager->getRepository(User::class);
 
-        if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            $queryBuilder
-                ->where('u.partner = :partner')
-                ->orWhere('u.partner IN (
-                    SELECT a FROM App\Entity\AffiliatePartner a WHERE a.registeredPartner = :partner
-                )')
-                ->orWhere('u.partner IN (
-                    SELECT spa FROM App\Entity\SolutionPartner spa WHERE spa.registeredPartner = :partner
-                )')
-                ->orWhere('u.partner IN (
-                    SELECT spr FROM App\Entity\SolutionProvider spr WHERE spr.registeredPartner = :partner
-                )')
-                ->setParameter('partner', $user->getPartner());
+
+        // If the user is a super admin, just return all users
+        if ($this->security->isGranted('ROLE_SUPER_ADMIN')) {
+            return $userRepository->findAll();
+        } else {
+            return $userRepository->findUsersByPartner($user->getPartner());
         }
-
-        return $queryBuilder->getQuery()->getResult();
     }
 }

@@ -3,13 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\SolutionPartner;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<SolutionPartner>
- */
-class SolutionPartnerRepository extends ServiceEntityRepository
+class SolutionPartnerRepository extends BasePartnerRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

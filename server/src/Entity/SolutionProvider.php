@@ -9,7 +9,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SolutionProviderRepository;
-use App\State\PartnerProvider;
 use App\Traits\GeneralPartnerTrait;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,7 +21,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
         ),
         new GetCollection(
-            provider: PartnerProvider::class
+            provider: 'App\State\PartnerProvider.Provider'
         ),
         new Post(
             denormalizationContext: ['groups' => ['post']],

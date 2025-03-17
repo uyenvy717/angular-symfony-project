@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
@@ -12,12 +11,11 @@ use App\Interface\IDable;
 use App\Repository\UserRepository;
 use App\State\UserProvider;
 use App\Traits\IDScheme;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -66,7 +64,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?DateTimeInterface $lastLoggedIn;
 
     #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "users")]
@@ -83,7 +81,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         $this->name = $name;
         $this->email = $email;
         $this->isActive = true;
-        $this->lastLoggedIn = Carbon::now();
+        $this->lastLoggedIn = CarbonImmutable::now();
         $this->partner = $partner;
     }
 
