@@ -8,9 +8,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\GrowthPartnerRepository;
-use Carbon\Carbon;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -40,11 +38,11 @@ class GrowthPartner extends Partner
 
     #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    private DateTimeInterface $startDate;
+    private DateTimeImmutable $startDate;
 
     #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
-    private ?DateTimeInterface $endDate;
+    private ?DateTimeImmutable $endDate;
 
     #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: SolutionPartner::class, mappedBy: 'registeredPartner')]
@@ -62,10 +60,10 @@ class GrowthPartner extends Partner
      * @param string $name
      * @param string $email
      * @param string|null $contactPerson
-     * @param DateTimeInterface $startDate
-     * @param DateTimeInterface|null $endDate
+     * @param DateTimeImmutable $startDate
+     * @param DateTimeImmutable|null $endDate
      */
-    public function __construct(string $name, string $email, ?string $contactPerson, DateTimeInterface $startDate, ?DateTimeInterface $endDate)
+    public function __construct(string $name, string $email, ?string $contactPerson, DateTimeImmutable $startDate, ?DateTimeImmutable $endDate)
     {
         parent::__construct($name, $email);
         $this->contactPerson = $contactPerson;
@@ -81,12 +79,12 @@ class GrowthPartner extends Partner
         $this->contactPerson = $contactPerson;
     }
 
-    public function setStartDate(DateTimeInterface $startDate): void
+    public function setStartDate(DateTimeImmutable $startDate): void
     {
         $this->startDate = $startDate;
     }
 
-    public function setEndDate(?DateTimeInterface $endDate): void
+    public function setEndDate(?DateTimeImmutable $endDate): void
     {
         $this->endDate = $endDate;
     }
@@ -96,12 +94,12 @@ class GrowthPartner extends Partner
         return $this->contactPerson;
     }
 
-    public function getStartDate(): DateTimeInterface
+    public function getStartDate(): DateTimeImmutable
     {
         return $this->startDate;
     }
 
-    public function getEndDate(): ?DateTimeInterface
+    public function getEndDate(): ?DateTimeImmutable
     {
         return $this->endDate;
     }

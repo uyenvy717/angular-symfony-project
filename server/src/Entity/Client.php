@@ -12,7 +12,7 @@ use App\Repository\ClientRepository;
 use App\State\ClientProvider;
 use App\Traits\IDScheme;
 use Carbon\CarbonImmutable;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -70,7 +70,7 @@ class Client implements IDable
 
     #[Groups(['client:read', 'client:post'])]
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
-    private DateTimeInterface $startDate;
+    private DateTimeImmutable $startDate;
 
     /**
      * a client can have a partner, but might not have one
@@ -84,9 +84,9 @@ class Client implements IDable
      * @param string $email
      * @param bool $isActive
      * @param Partner|null $partner
-     * @param DateTimeInterface|null $startDate
+     * @param DateTimeImmutable|null $startDate
      */
-    public function __construct(string $name, string $email, bool $isActive, ?Partner $partner, ?DateTimeInterface $startDate)
+    public function __construct(string $name, string $email, bool $isActive, ?Partner $partner, ?DateTimeImmutable $startDate)
     {
         $this->name = $name;
         $this->email = $email;
@@ -120,12 +120,12 @@ class Client implements IDable
     }
 
     #[Groups(['client:patch'])]
-    public function setStartDate(?DateTimeInterface $startDate): void
+    public function setStartDate(?DateTimeImmutable $startDate): void
     {
         $this->startDate = $startDate;
     }
 
-    public function getStartDate(): DateTimeInterface
+    public function getStartDate(): DateTimeImmutable
     {
         return $this->startDate;
     }

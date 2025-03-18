@@ -2,9 +2,7 @@
 
 namespace App\Traits;
 
-use Carbon\Carbon;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -17,11 +15,11 @@ trait GeneralPartnerTrait
 
     #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    private DateTimeInterface $startDate;
+    private DateTimeImmutable $startDate;
 
     #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
-    private ?DateTimeInterface $endDate = null;
+    private ?DateTimeImmutable $endDate = null;
 
     #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(nullable: true)]
@@ -32,12 +30,12 @@ trait GeneralPartnerTrait
         $this->contactPerson = $contactPerson;
     }
 
-    public function setStartDate(DateTimeInterface $startDate): void
+    public function setStartDate(DateTimeImmutable $startDate): void
     {
         $this->startDate = $startDate;
     }
 
-    public function setEndDate(?DateTimeInterface $endDate): void
+    public function setEndDate(?DateTimeImmutable $endDate): void
     {
         $this->endDate = $endDate;
     }
@@ -52,12 +50,12 @@ trait GeneralPartnerTrait
         return $this->contactPerson;
     }
 
-    public function getStartDate(): DateTimeInterface
+    public function getStartDate(): DateTimeImmutable
     {
         return $this->startDate;
     }
 
-    public function getEndDate(): ?DateTimeInterface
+    public function getEndDate(): ?DateTimeImmutable
     {
         return $this->endDate;
     }

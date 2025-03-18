@@ -10,7 +10,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\AffiliatePartnerRepository;
 use App\Traits\GeneralPartnerTrait;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -51,8 +51,8 @@ class AffiliatePartner extends Partner
      * @param string $email
      * @param GrowthPartner|null $registeredPartner
      * @param string|null $contactPerson
-     * @param DateTimeInterface $startDate
-     * @param DateTimeInterface|null $endDate
+     * @param DateTimeImmutable $startDate
+     * @param DateTimeImmutable|null $endDate
      * @param int|null $renewalInterval
      */
     public function __construct(
@@ -60,8 +60,8 @@ class AffiliatePartner extends Partner
         string $email,
         ?GrowthPartner $registeredPartner,
         ?string $contactPerson,
-        DateTimeInterface $startDate,
-        ?DateTimeInterface $endDate,
+        DateTimeImmutable $startDate,
+        ?DateTimeImmutable $endDate,
         ?int $renewalInterval
     )
     {

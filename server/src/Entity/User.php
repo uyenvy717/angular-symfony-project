@@ -12,7 +12,7 @@ use App\Repository\UserRepository;
 use App\State\UserProvider;
 use App\Traits\IDScheme;
 use Carbon\CarbonImmutable;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -65,7 +65,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
-    private ?DateTimeInterface $lastLoggedIn;
+    private ?DateTimeImmutable $lastLoggedIn;
 
     #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "users")]
     #[ORM\JoinColumn]
@@ -119,7 +119,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLastLoggedIn(): ?DateTimeInterface
+    public function getLastLoggedIn(): ?DateTimeImmutable
     {
         return $this->lastLoggedIn;
     }
@@ -147,7 +147,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         $this->email = $email;
     }
 
-    public function setLastLoggedIn(?DateTimeInterface $lastLoggedIn): void
+    public function setLastLoggedIn(?DateTimeImmutable $lastLoggedIn): void
     {
         $this->lastLoggedIn = $lastLoggedIn;
     }
