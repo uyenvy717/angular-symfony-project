@@ -3,36 +3,49 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
 use App\Repository\UserRepository;
+use App\State\UserProvider;
 use App\Traits\IDScheme;
-use Carbon\Carbon;
-use DateTimeInterface;
+use Carbon\CarbonImmutable;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "portal_user")]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner() == user.getPartner()
+                or object.getPartner().getRegisteredPartner() == user.getPartner()"
+        ),
+        new GetCollection(
+            provider: UserProvider::class
+        ),
         new Post(
             denormalizationContext: ['groups' => ['user:post']],
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
         new Patch(
             denormalizationContext: ['groups' => ['user:patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
-        new Delete()
     ]
 )]
-class User implements IDable
+class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
 {
     use IDScheme;
     #[ORM\Column]
@@ -44,8 +57,15 @@ class User implements IDable
     #[ORM\Column(length: 255)]
     private string $email;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?DateTimeInterface $lastLoggedIn;
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(type: 'string')]
+    private string $password;
+
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $lastLoggedIn;
 
     #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "users")]
     #[ORM\JoinColumn]
@@ -61,7 +81,7 @@ class User implements IDable
         $this->name = $name;
         $this->email = $email;
         $this->isActive = true;
-        $this->lastLoggedIn = Carbon::now();
+        $this->lastLoggedIn = CarbonImmutable::now();
         $this->partner = $partner;
     }
 
@@ -70,7 +90,7 @@ class User implements IDable
         return $this->isActive;
     }
 
-    public function getEmail(): string
+    public function getUserIdentifier(): string
     {
         return $this->email;
     }
@@ -80,7 +100,26 @@ class User implements IDable
         return $this->name;
     }
 
-    public function getLastLoggedIn(): ?DateTimeInterface
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getLastLoggedIn(): ?DateTimeImmutable
     {
         return $this->lastLoggedIn;
     }
@@ -108,14 +147,30 @@ class User implements IDable
         $this->email = $email;
     }
 
-    public function setLastLoggedIn(?DateTimeInterface $lastLoggedIn): void
+    public function setLastLoggedIn(?DateTimeImmutable $lastLoggedIn): void
     {
         $this->lastLoggedIn = $lastLoggedIn;
     }
 
-    #[Groups(['user:post', 'user:patch'])]
-    public function setPartner(?Partner $partner): void
+    #[Groups(['user:post'])]
+    public function setPartner(Partner $partner): void
     {
         $this->partner = $partner;
+    }
+
+    #[Groups(['user:post'])]
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Implement eraseCredentials() method.
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
     }
 }

@@ -13,6 +13,7 @@
         "doctrine/doctrine-bundle": "^2.13.2",
         "doctrine/doctrine-migrations-bundle": "^3.4.1",
         "doctrine/orm": "^3.3.2",
+        "lexik/jwt-authentication-bundle": "^3.1",
         "nelmio/cors-bundle": "^2.5",
         "nesbot/carbon": "^3.8.5",
         "phpdocumentor/reflection-docblock": "^5.6.1",
@@ -85,7 +86,7 @@
         }
     },
     "require-dev": {
-        "dama/doctrine-test-bundle": "^8.2.2",
+        "dama/doctrine-test-bundle": "^8.2",
         "doctrine/doctrine-fixtures-bundle": "^4.0",
         "justinrainbow/json-schema": "^6.1",
         "phpunit/phpunit": "^9.6.22",

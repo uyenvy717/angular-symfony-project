@@ -3,16 +3,16 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
 use App\Repository\ClientRepository;
+use App\State\ClientProvider;
 use App\Traits\IDScheme;
-use Carbon\Carbon;
-use DateTimeInterface;
+use Carbon\CarbonImmutable;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -20,15 +20,36 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner() == user.getPartner()
+                or object.getPartner().getRegisteredPartner() == user.getPartner()"
+        ),
+        new GetCollection(
+            provider: ClientProvider::class
+        ),
         new Post(
-          denormalizationContext: ['groups' => ['client:post']]
+            denormalizationContext: ['groups' => ['client:post']],
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
+                or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner() == user.getPartner()"
         ),
         new Patch(
-          denormalizationContext: ['groups' => ['client:patch']]
+            denormalizationContext: ['groups' => ['client:patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner() == user.getPartner()
+                or object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
-        new Delete()
+        new Patch(
+            uriTemplate: '/clients/{id}/registeredPartner',
+            denormalizationContext: ['groups' => ['client:patch:assignPartner']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner().getRegisteredPartner()  == user.getPartner()
+                or object.getPartner() == user.getPartner()",
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getPartner().getRegisteredPartner() == user.getPartner()
+                or object.getPartner() == user.getPartner()"
+        ),
     ],
     normalizationContext: ['groups' => ['client:read']]
 )]
@@ -48,8 +69,8 @@ class Client implements IDable
     private string $email;
 
     #[Groups(['client:read', 'client:post'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private DateTimeInterface $startDate;
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private DateTimeImmutable $startDate;
 
     /**
      * a client can have a partner, but might not have one
@@ -63,15 +84,15 @@ class Client implements IDable
      * @param string $email
      * @param bool $isActive
      * @param Partner|null $partner
-     * @param DateTimeInterface|null $startDate
+     * @param DateTimeImmutable|null $startDate
      */
-    public function __construct(string $name, string $email, bool $isActive, ?Partner $partner, ?DateTimeInterface $startDate)
+    public function __construct(string $name, string $email, bool $isActive, ?Partner $partner, ?DateTimeImmutable $startDate)
     {
         $this->name = $name;
         $this->email = $email;
         $this->isActive = $isActive;
         $this->partner = $partner ?? null;
-        $this->startDate = $startDate ?? Carbon::now();
+        $this->startDate = $startDate ?? CarbonImmutable::now();
     }
 
     #[Groups(['client:read'])]
@@ -86,7 +107,7 @@ class Client implements IDable
         $this->isActive = $isActive;
     }
 
-    #[Groups(['client:patch', 'client:post'])]
+    #[Groups(['client:patch:assignPartner', 'client:post'])]
     public function setPartner(?Partner $partner): void
     {
         $this->partner = $partner;
@@ -99,12 +120,12 @@ class Client implements IDable
     }
 
     #[Groups(['client:patch'])]
-    public function setStartDate(?DateTimeInterface $startDate): void
+    public function setStartDate(?DateTimeImmutable $startDate): void
     {
         $this->startDate = $startDate;
     }
 
-    public function getStartDate(): DateTimeInterface
+    public function getStartDate(): DateTimeImmutable
     {
         return $this->startDate;
     }

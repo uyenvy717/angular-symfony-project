@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\GrowthPartner;
+use App\Entity\Partner;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,28 +18,29 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findUsersByPartner(?Partner $partner): array
+    {
+        $query = $this->createQueryBuilder('u');
 
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($partner) {
+            if ($partner instanceof GrowthPartner) {
+                $query->where('u.partner = :partner')
+                    ->orWhere('u.partner IN (
+                    SELECT a FROM App\Entity\AffiliatePartner a WHERE a.registeredPartner = :partner
+                )')
+                    ->orWhere('u.partner IN (
+                    SELECT spa FROM App\Entity\SolutionPartner spa WHERE spa.registeredPartner = :partner
+                )')
+                    ->orWhere('u.partner IN (
+                    SELECT spr FROM App\Entity\SolutionProvider spr WHERE spr.registeredPartner = :partner
+                )')
+                    ->setParameter('partner', $partner);
+            } else {
+                $query->where('u.partner = :partner');
+            }
+
+        }
+
+        return $query->getQuery()->getResult();
+    }
 }

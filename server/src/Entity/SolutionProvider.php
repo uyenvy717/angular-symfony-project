@@ -2,17 +2,41 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\SolutionProviderRepository;
 use App\Traits\GeneralPartnerTrait;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SolutionProviderRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['read']],
+    operations: [
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
+        ),
+        new GetCollection(
+            provider: 'App\State\PartnerProvider.Provider'
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['post']],
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
+        ),
+        new Patch(
+            denormalizationContext: ['groups' => ['patch']],
+            security: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null",
+            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+                or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
+        )
+    ],
+    normalizationContext: ['groups' => ['read']]
 )]
 class SolutionProvider extends Partner
 {
@@ -20,6 +44,7 @@ class SolutionProvider extends Partner
 
     #[ORM\ManyToOne(targetEntity: GrowthPartner::class, inversedBy: "solutionProviders")]
     #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(readableLink: false, writableLink: false)]
     private ?GrowthPartner $registeredPartner;
 
     /**
@@ -27,11 +52,19 @@ class SolutionProvider extends Partner
      * @param string $email
      * @param GrowthPartner|null $registeredPartner
      * @param string|null $contactPerson
-     * @param DateTimeInterface $startDate
-     * @param DateTimeInterface|null $endDate
+     * @param DateTimeImmutable $startDate
+     * @param DateTimeImmutable|null $endDate
      * @param int|null $renewalInterval
      */
-    public function __construct(string $name, string $email, ?GrowthPartner $registeredPartner, ?string $contactPerson, DateTimeInterface $startDate, ?DateTimeInterface $endDate, ?int $renewalInterval)
+    public function __construct(
+        string $name,
+        string $email,
+        ?GrowthPartner $registeredPartner,
+        ?string $contactPerson,
+        DateTimeImmutable $startDate,
+        ?DateTimeImmutable $endDate,
+        ?int $renewalInterval
+    )
     {
         parent::__construct($name, $email);
         $this->registeredPartner = $registeredPartner;
@@ -41,9 +74,15 @@ class SolutionProvider extends Partner
         $this->renewalInterval = $renewalInterval;
     }
 
+    #[Groups(['post', 'patch'])]
     public function setRegisteredPartner(?GrowthPartner $partner): void
     {
         $this->registeredPartner = $partner;
+    }
+
+    public function getRegisteredPartner(): ?GrowthPartner
+    {
+        return $this->registeredPartner;
     }
 
     #[Groups(['read'])]

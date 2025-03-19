@@ -3,8 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\GrowthPartnerRepository;
-use DateTimeInterface;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -13,32 +17,42 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: GrowthPartnerRepository::class)]
 #[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(
+            denormalizationContext: ['groups' => ['post']]
+        ),
+        new Patch(
+            denormalizationContext: ['groups' => ['patch']]
+        ),
+    ],
     normalizationContext: ['groups' => ['read']],
-    denormalizationContext: ['groups' => ['write']],
+    security: "is_granted('ROLE_SUPER_ADMIN')"
 )]
 class GrowthPartner extends Partner
 {
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contactPerson;
 
-    #[Groups(['read'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private DateTimeInterface $startDate;
+    #[Groups(['read', 'post', 'patch'])]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private DateTimeImmutable $startDate;
 
-    #[Groups(['read'])]
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?DateTimeInterface $endDate;
+    #[Groups(['read', 'post', 'patch'])]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $endDate;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: SolutionPartner::class, mappedBy: 'registeredPartner')]
     private Collection $solutionPartners;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: SolutionProvider::class, mappedBy: 'registeredPartner')]
     private Collection $solutionProviders;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'patch'])]
     #[ORM\OneToMany(targetEntity: AffiliatePartner::class, mappedBy: 'registeredPartner')]
     private Collection $affiliatePartners;
 
@@ -46,10 +60,10 @@ class GrowthPartner extends Partner
      * @param string $name
      * @param string $email
      * @param string|null $contactPerson
-     * @param DateTimeInterface $startDate
-     * @param DateTimeInterface|null $endDate
+     * @param DateTimeImmutable $startDate
+     * @param DateTimeImmutable|null $endDate
      */
-    public function __construct(string $name, string $email, ?string $contactPerson, DateTimeInterface $startDate, ?DateTimeInterface $endDate)
+    public function __construct(string $name, string $email, ?string $contactPerson, DateTimeImmutable $startDate, ?DateTimeImmutable $endDate)
     {
         parent::__construct($name, $email);
         $this->contactPerson = $contactPerson;
@@ -60,17 +74,32 @@ class GrowthPartner extends Partner
         $this->affiliatePartners = new ArrayCollection();
     }
 
+    public function setContactPerson(?string $contactPerson): void
+    {
+        $this->contactPerson = $contactPerson;
+    }
+
+    public function setStartDate(DateTimeImmutable $startDate): void
+    {
+        $this->startDate = $startDate;
+    }
+
+    public function setEndDate(?DateTimeImmutable $endDate): void
+    {
+        $this->endDate = $endDate;
+    }
+
     public function getContactPerson(): ?string
     {
         return $this->contactPerson;
     }
 
-    public function getStartDate(): DateTimeInterface
+    public function getStartDate(): DateTimeImmutable
     {
         return $this->startDate;
     }
 
-    public function getEndDate(): ?DateTimeInterface
+    public function getEndDate(): ?DateTimeImmutable
     {
         return $this->endDate;
     }
@@ -91,5 +120,10 @@ class GrowthPartner extends Partner
     public function getAffiliatePartners(): Collection
     {
         return $this->affiliatePartners;
+    }
+
+    public function getRegisteredPartner(): null
+    {
+        return null;
     }
 }

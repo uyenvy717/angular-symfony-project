@@ -27,11 +27,11 @@ abstract class Partner implements IDable
 {
     use IDScheme;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post', 'patch'])]
     #[ORM\Column(length: 255)]
     private string $name;
 
-    #[Groups(['read'])]
+    #[Groups(['read', 'post'])]
     #[ORM\Column(length: 255)]
     private string $email;
 
@@ -56,6 +56,11 @@ abstract class Partner implements IDable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 
     public function getEmail(): string

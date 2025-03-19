@@ -19,6 +19,21 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/State/PartnerProvider.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\State\PartnerProvider.Affiliate:
+        class: 'App\State\PartnerProvider'
+        arguments:
+            $entityClass: 'App\Entity\AffiliatePartner'
+
+    App\State\PartnerProvider.Partner:
+        class: 'App\State\PartnerProvider'
+        arguments:
+            $entityClass: 'App\Entity\SolutionPartner'
+
+    App\State\PartnerProvider.Provider:
+        class: 'App\State\PartnerProvider'
+        arguments:
+            $entityClass: 'App\Entity\SolutionProvider'
