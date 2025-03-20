@@ -1,0 +1,7 @@
+.btn {
+  @apply flex m-1 w-5/6 justify-start justify-self-center bg-transparent py-2 pl-4 rounded transition duration-300;
+
+  &:hover {
+    @apply bg-secondary-dark text-primary border-transparent
+  }
+}
