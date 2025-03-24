@@ -1,22 +1,22 @@
-<nz-table #basicTable [nzData]="listOfData">
+<nz-table #basicTable [nzData]="data" [nzNoResult]="'No data available'">
   <thead>
-  <tr>
-    <th>Name</th>
-    <th>Age</th>
-    <th>Address</th>
-    <th>Action</th>
-  </tr>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Start date</th>
+      <th>Action</th>
+    </tr>
   </thead>
   <tbody>
     @for (data of basicTable.data; track data) {
-      <tr (click)="console()" routerLink="/detail">
+      <tr>
         <td>{{ data.name }}</td>
-        <td>{{ data.age }}</td>
-        <td>{{ data.address }}</td>
+        <td>{{ data.email }}</td>
+        <td>{{ data.startDate }}</td>
         <td>
           <a>Action 一 {{ data.name }}</a>
           <nz-divider nzType="vertical"></nz-divider>
-<!--          <a (click)="showModal()" )>Delete</a>-->
+          <a>Delete</a>
         </td>
       </tr>
     }

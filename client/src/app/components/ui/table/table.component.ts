@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
@@ -12,27 +12,14 @@ import { ModalComponent } from '../modal/modal.component';
   templateUrl: './table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TableComponent {
-  listOfData: any[] = [
-    {
-      key: '1',
-      name: 'John Brown',
-      age: 32,
-      address: 'New York No. 1 Lake Park',
-    },
-    {
-      key: '2',
-      name: 'Jim Green',
-      age: 42,
-      address: 'London No. 1 Lake Park',
-    },
-    {
-      key: '3',
-      name: 'Joe Black',
-      age: 32,
-      address: 'Sidney No. 1 Lake Park',
-    },
-  ];
+export class TableComponent implements OnChanges {
+  @Input() data: any[] = [];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data']) {
+      console.log('Table data changed:', this.data);
+    }
+  }
 
   console() {
     console.log('hi');

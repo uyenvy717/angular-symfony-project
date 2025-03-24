@@ -1,7 +1,22 @@
 <h1 class="text-2xl font-bold mb-4">Partner</h1>
 <nz-tabset>
   <nz-tab nzTitle="Growth Partner">
-    <app-table></app-table>
+    <div class="p-4">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex justify-center items-center h-32">
+        <nz-spin nzSimple></nz-spin>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="text-red-500 p-4 text-center">
+        {{ error }}
+      </div>
+
+      <!-- Data Display -->
+      <div *ngIf="!loading && !error">
+        <app-table [data]="partners"></app-table>
+      </div>
+    </div>
   </nz-tab>
   <nz-tab nzTitle="Solution Partner">
     <app-table></app-table>
