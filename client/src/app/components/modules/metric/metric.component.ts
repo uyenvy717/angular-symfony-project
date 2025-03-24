@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-metric',
   imports: [CommonModule],
-  templateUrl: './header.component.html',
+  standalone: true,
+  templateUrl: './metric.component.html',
   styles: `
     :host {
-      grid-area: quickactions;
+      display: block;
     }
   `,
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent {}
+export class MetricComponent {}

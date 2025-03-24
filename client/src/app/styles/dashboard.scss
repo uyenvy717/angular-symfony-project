@@ -1,0 +1,14 @@
+.dashboard {
+  @apply grid-areas-main-dashboard;
+  .statistic {
+    grid-area: statistic;
+  }
+
+  .list {
+    grid-area: list;
+  }
+
+  .metric {
+    grid-area: metric;
+  }
+}

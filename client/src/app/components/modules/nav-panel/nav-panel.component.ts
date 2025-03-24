@@ -4,10 +4,10 @@ import { ButtonComponent } from '../../ui/button/button.component';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-panel',
+  selector: 'app-nav-panel',
   imports: [CommonModule, ButtonComponent],
   standalone: true,
-  templateUrl: './panel.component.html',
+  templateUrl: './nav-panel.component.html',
   styles: `
     :host {
       grid-area: navpanel;
@@ -15,12 +15,16 @@ import { Router } from '@angular/router';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PanelComponent {
+export class NavPanelComponent {
   buttonLabels: string[] = ['Dashboard', 'Partner', 'Client', 'User'];
 
   constructor(private router: Router) {}
 
   navigateTo(route: string) {
-    this.router.navigate(['/' + route.toLowerCase()]);
+    if (route === 'Dashboard') {
+      this.router.navigate(['/dashboard']);
+    } else {
+      this.router.navigate(['/' + route.toLowerCase() + 's']);
+    }
   }
 }

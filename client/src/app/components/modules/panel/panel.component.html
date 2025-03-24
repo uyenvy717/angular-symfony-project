@@ -1,8 +1,0 @@
-<ng-container>
-  <div class="flex flex-col h-screen pt-4 relative border-r border-gray-200">
-    <ng-container *ngFor="let button of buttonLabels">
-      <!-- <app-button [label]="label" (click)="label === 'Dashboard' ? navigateToDashboard() : null"></app-button> -->
-      <app-button [label]="button" (click)="navigateTo(button)"></app-button>
-    </ng-container>
-  </div>
-</ng-container>

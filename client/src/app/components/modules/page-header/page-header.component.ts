@@ -2,10 +2,15 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-page-header',
   imports: [CommonModule],
+  templateUrl: './page-header.component.html',
+  styles: `
+    :host {
+      grid-area: quickactions;
+    }
+  `,
   standalone: true,
-  templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {}
+export class PageHeaderComponent {}

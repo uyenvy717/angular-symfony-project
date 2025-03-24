@@ -1,0 +1,16 @@
+<h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+<div class="dashboard grid gap-8 gap-y-10 max-h-full">
+  <div class="statistic grid grid-cols-3">
+    <nz-statistic [nzValue]="(1949101 | number)!" nzTitle="Active Users"></nz-statistic>
+    <nz-statistic [nzValue]="(1949101 | number)!" nzTitle="Active Users"></nz-statistic>
+    <nz-statistic [nzValue]="(1949101 | number)!" nzTitle="Active Users"></nz-statistic>
+  </div>
+  <div class="list grid grid-rows-2 gap-y-8">
+    <app-card [showTable]="true"></app-card>
+    <app-card [showTable]="true"></app-card>
+  </div>
+  <div class="metric grid grid-rows-10 gap-y-8 ">
+    <app-card class="row-span-9" [showTable]="true"></app-card>
+    <button nz-button nzType="primary" nzBlock>Primary</button>
+  </div>
+</div>

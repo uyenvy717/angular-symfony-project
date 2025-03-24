@@ -1,3 +1,4 @@
 .layout {
-  @apply grid-areas-ws-default;
+  @apply grid-areas-pp-default;
+  grid-template-columns: 1fr 4fr;
 }

@@ -137,13 +137,17 @@ module.exports = {
             },
             gridTemplateAreas: {
                 'main-default': [
-                    'breadcrumbs panel',
-                    'content panel'
+                    'breadcrumbs nav-panel',
+                    'content nav-panel'
                 ],
-                'ws-default': [
-                    'quickactions quickactions quickactions',
-                    'navpanel main main',
-                    'banner banner banner'
+                'main-dashboard': [
+                    'statistic statistic statistic',
+                    'list metric metric'
+                ],
+                'pp-default': [
+                    'quickactions quickactions',
+                    'navpanel main',
+                    'banner banner'
                 ],
                 'ws-user': [
                     'quickactions quickactions useractions',

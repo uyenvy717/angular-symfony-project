@@ -1,0 +1,16 @@
+<!--<nz-card style="width:300px;" nzTitle="Card title" [nzExtra]="extraTemplate">-->
+<nz-card nzTitle="Card title">
+  <ng-container *ngIf="showTable">
+    <app-table></app-table>
+  </ng-container>
+  <ng-container *ngIf="showContent">
+    <div>
+      <p>Card content</p>
+      <p>Card content</p>
+      <p>Card content</p>
+    </div>
+  </ng-container>
+</nz-card>
+<!--<ng-template #extraTemplate>-->
+<!--  <a>More</a>-->
+<!--</ng-template>-->
