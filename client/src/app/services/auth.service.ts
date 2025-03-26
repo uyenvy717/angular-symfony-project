@@ -5,7 +5,18 @@ import { environment } from '../../environments/environment';
 
 interface LoginResponse {
   token: string;
-  user: any;
+}
+
+interface TokenPayload {
+  exp: number;
+  iat: number;
+  name: string;
+  partner: {
+    id: string;
+    type: string;
+  };
+  email: string;
+  roles?: string[];
 }
 
 @Injectable({
@@ -14,6 +25,9 @@ interface LoginResponse {
 export class AuthService {
   private apiUrl = environment.authUrl;
   private tokenKey = 'auth_token';
+  private userRoles: string[] = [];
+  private tokenInfo!: TokenPayload | null;
+
   constructor(private http: HttpClient) {
     // Initialize roles from token if it exists
     this.initializeRoles();
@@ -27,6 +41,15 @@ export class AuthService {
     }
   }
 
+  // Check if user has a specific role
+  hasRole(role: string): boolean {
+    return this.userRoles.includes(role);
+  }
+
+  // Check if user's partner type is GrowthPartner
+  isGrowthPartner(): boolean {
+    return !!this.tokenInfo?.partner?.type?.includes('GrowthPartner');
+  }
 
   // Decode and get token payload
   getDecodedToken(): TokenPayload | null {
@@ -82,6 +105,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    this.userRoles = [];
   }
 
   getToken(): string | null {

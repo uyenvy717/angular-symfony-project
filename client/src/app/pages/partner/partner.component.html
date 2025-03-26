@@ -1,27 +1,60 @@
 <h1 class="text-2xl font-bold mb-4">Partner</h1>
-<nz-tabset>
-  <nz-tab nzTitle="Growth Partner">
-    <div class="p-4">
-      <!-- Loading State -->
-      <div *ngIf="loading" class="flex justify-center items-center h-32">
-        <nz-spin nzSimple></nz-spin>
+<div class="partner-container">
+  <nz-tabset (nzSelectedIndexChange)="onTabChange($event)">
+    <!-- Growth Partner Tab - Only show for super admin -->
+    <nz-tab *ngIf="isSuperAdmin" nzTitle="Growth Partner">
+      <div *ngIf="loading" class="loading-container">
+        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
       </div>
-
-      <!-- Error State -->
-      <div *ngIf="error" class="text-red-500 p-4 text-center">
+      <div *ngIf="error" class="error-message">
         {{ error }}
       </div>
-
-      <!-- Data Display -->
       <div *ngIf="!loading && !error">
         <app-table [data]="partners"></app-table>
       </div>
-    </div>
-  </nz-tab>
-  <nz-tab nzTitle="Solution Partner">
-    <app-table></app-table>
-  </nz-tab>
-  <nz-tab nzTitle="Solution Provider">
-    <app-table></app-table>
-  </nz-tab>
-</nz-tabset>
+    </nz-tab>
+
+    <!-- Solution Partner Tab -->
+    <nz-tab nzTitle="Solution Partner">
+      <div *ngIf="loading" class="loading-container">
+        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+      </div>
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+      <div *ngIf="!loading && !error">
+        <app-table [data]="partners"></app-table>
+      </div>
+    </nz-tab>
+
+    <!-- Solution Provider Tab -->
+    <nz-tab nzTitle="Solution Provider">
+      <div *ngIf="loading" class="loading-container">
+        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+      </div>
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+      <div *ngIf="!loading && !error">
+        <app-table [data]="partners"></app-table>
+      </div>
+    </nz-tab>
+
+    <!-- Affiliate Partner Tab -->
+    <nz-tab nzTitle="Affiliate Partner">
+      <div *ngIf="loading" class="loading-container">
+        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+      </div>
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+      <div *ngIf="!loading && !error">
+        <app-table [data]="partners"></app-table>
+      </div>
+    </nz-tab>
+  </nz-tabset>
+</div>
+
+<ng-template #totalTemplate let-total>
+  Total {{ total }} items
+</ng-template>
