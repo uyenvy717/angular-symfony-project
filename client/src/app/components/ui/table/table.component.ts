@@ -21,10 +21,6 @@ export class TableComponent implements OnChanges {
     }
   }
 
-  console() {
-    console.log('hi');
-  }
-
   // showModal() {
   //   ModalComponent;
   // }

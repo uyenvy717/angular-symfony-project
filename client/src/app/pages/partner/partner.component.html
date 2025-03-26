@@ -3,54 +3,62 @@
   <nz-tabset (nzSelectedIndexChange)="onTabChange($event)">
     <!-- Growth Partner Tab - Only show for super admin -->
     <nz-tab *ngIf="isSuperAdmin" nzTitle="Growth Partner">
-      <div *ngIf="loading" class="loading-container">
-        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-      </div>
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-      </div>
-      <div *ngIf="!loading && !error">
+      @if (error(); as error) {
+        <div class="error-message">
+          {{ error }}
+        </div>
+      } @else if (loading()) {
+        <div class="loading-container">
+          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+        </div>
+      } @else {
         <app-table [data]="partners"></app-table>
-      </div>
+      }
     </nz-tab>
 
     <!-- Solution Partner Tab -->
     <nz-tab nzTitle="Solution Partner">
-      <div *ngIf="loading" class="loading-container">
-        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-      </div>
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-      </div>
-      <div *ngIf="!loading && !error">
+      @if (error(); as error) {
+        <div class="error-message">
+          {{ error }}
+        </div>
+      } @else if (loading()) {
+        <div class="loading-container">
+          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+        </div>
+      } @else {
         <app-table [data]="partners"></app-table>
-      </div>
+      }
     </nz-tab>
 
     <!-- Solution Provider Tab -->
     <nz-tab nzTitle="Solution Provider">
-      <div *ngIf="loading" class="loading-container">
-        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-      </div>
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-      </div>
-      <div *ngIf="!loading && !error">
+      @if (error(); as error) {
+        <div class="error-message">
+          {{ error }}
+        </div>
+      } @else if (loading()) {
+        <div class="loading-container">
+          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+        </div>
+      } @else {
         <app-table [data]="partners"></app-table>
-      </div>
+      }
     </nz-tab>
 
     <!-- Affiliate Partner Tab -->
     <nz-tab nzTitle="Affiliate Partner">
-      <div *ngIf="loading" class="loading-container">
-        <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-      </div>
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-      </div>
-      <div *ngIf="!loading && !error">
+      @if (error(); as error) {
+        <div class="error-message">
+          {{ error }}
+        </div>
+      } @else if (loading()) {
+        <div class="loading-container">
+          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+        </div>
+      } @else {
         <app-table [data]="partners"></app-table>
-      </div>
+      }
     </nz-tab>
   </nz-tabset>
 </div>

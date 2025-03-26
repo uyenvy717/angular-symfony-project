@@ -8,6 +8,7 @@ interface Environment {
     provider: string;
     affiliate: string;
   };
+  clientUrl: string;
 }
 
 const API_URL = 'http://localhost:8000/api';
@@ -21,5 +22,7 @@ export const environment: Environment = {
     solution: `${API_URL}/solution_partners`,
     provider: `${API_URL}/solution_providers`,
     affiliate: `${API_URL}/affiliate_partners`
-  }
+  },
+  clientUrl: `${API_URL}/clients`,
+  userUrl: `${API_URL}/users`,
 };

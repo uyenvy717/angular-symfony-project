@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -22,8 +22,8 @@ import { TableComponent } from '../../components/ui/table/table.component';
 })
 export class PartnerComponent implements OnInit {
   partners: any[] = [];
-  loading = false;
-  error: string | null = null;
+  loading = signal<boolean>(false);
+  error = signal<string | null >(null);
   currentTab: PartnerType;
   isSuperAdmin = false;
 
@@ -54,19 +54,19 @@ export class PartnerComponent implements OnInit {
   }
 
   loadPartners(): void {
-    this.loading = true;
-    this.error = null;
+    this.loading.set(true);
+    this.error.set(null);
 
     this.partnerService.getPartners(this.currentTab).subscribe({
       next: (data) => {
         this.partners = data.member;
-        this.loading = false;
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading partners:', error);
-        this.error = 'Failed to load partners';
-        this.loading = false;
-        this.message.error('Failed to load partners');
+        this.error.set('Failed to load partners');
+        this.loading.set(false);
+        this.message.error(this.error() ?? '');
       }
     });
   }

@@ -7,7 +7,6 @@ export const ApiInterceptor: HttpInterceptorFn = (req, next) => {
   const modifiedRequest = req.clone({
     headers: req.headers
       .set('Content-Type', 'application/json')
-      // Add any other headers you need
   });
 
   return next(modifiedRequest).pipe(

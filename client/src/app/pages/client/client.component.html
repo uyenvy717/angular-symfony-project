@@ -1,2 +1,14 @@
 <h1 class="text-2xl font-bold mb-4">Client</h1>
-<app-table></app-table>
+<div class="client-container">
+  @if (error(); as error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  } @else if (loading()) {
+    <div class="loading-container">
+      <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+    </div>
+  } @else {
+    <app-table [data]="clients"></app-table>
+  }
+</div>
