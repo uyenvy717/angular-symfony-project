@@ -35,9 +35,11 @@ export class AuthService {
 
   private initializeRoles() {
     this.tokenInfo = this.getDecodedToken();
-    if (this.tokenInfo && this.tokenInfo.roles) {
+    const isExpired = this.isTokenExpired(this.tokenInfo);
+    if (isExpired) {
+      this.logout();
+    } else if (this.tokenInfo && this.tokenInfo.roles) {
       this.userRoles = this.tokenInfo.roles;
-      console.log('Initialized user roles:', this.userRoles);
     }
   }
 
@@ -69,13 +71,12 @@ export class AuthService {
   }
 
   // Check if token is expired
-  // isTokenExpired(): boolean {
-  //   const decodedToken = this.getDecodedToken();
-  //   if (!decodedToken) return true;
-  //
-  //   const currentTime = Date.now() / 1000;
-  //   return decodedToken.exp < currentTime;
-  // }
+  isTokenExpired(decodedToken: TokenPayload | null): boolean {
+    if (!decodedToken) return true;
+
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  }
 
   login(credentials: {
     password: string;
@@ -104,6 +105,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     this.userRoles = [];
+    this.tokenInfo = null;
   }
 
   getToken(): string | null {
