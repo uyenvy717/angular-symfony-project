@@ -1,0 +1,35 @@
+<div class="form-container">
+  <div class="form-box">
+    <h1 class="text-3xl text-center mb-8">{{ title }}</h1>
+    <form nz-form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+      <nz-form-item>
+        <nz-form-control [nzErrorTip]="emailError">
+          <nz-input-group nzPrefixIcon="user">
+            <input type="email" nz-input formControlName="email" placeholder="Email" />
+          </nz-input-group>
+        </nz-form-control>
+        <ng-template #emailError let-control>
+          <ng-container *ngIf="control.hasError('required')">Please input your email!</ng-container>
+          <ng-container *ngIf="control.hasError('email')">Please input a valid email!</ng-container>
+        </ng-template>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control [nzErrorTip]="passwordError">
+          <nz-input-group nzPrefixIcon="lock">
+            <input type="password" nz-input formControlName="password" placeholder="Password" />
+          </nz-input-group>
+        </nz-form-control>
+        <ng-template #passwordError let-control>
+          <ng-container *ngIf="control.hasError('required')">Please input your password!</ng-container>
+        </ng-template>
+      </nz-form-item>
+
+      <nz-form-item>
+        <button nz-button class="form-button" [nzType]="'primary'" [disabled]="!formGroup.valid">
+          {{ submitButtonText }}
+        </button>
+      </nz-form-item>
+    </form>
+  </div>
+</div>

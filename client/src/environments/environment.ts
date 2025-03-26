@@ -1,5 +1,25 @@
-export const environment = {
+interface Environment {
+  production: boolean;
+  apiUrl: string;
+  authUrl: string;
+  partnerUrls: {
+    growth: string;
+    solution: string;
+    provider: string;
+    affiliate: string;
+  };
+}
+
+const API_URL = 'http://localhost:8000/api';
+
+export const environment: Environment = {
   production: false,
-  apiUrl: 'http://localhost:8000/api',
-  growthPartnerApiUrl: 'http://localhost:8000/api/growth_partners'
-}; 
+  apiUrl: API_URL,
+  authUrl: `http://localhost:8000/auth`,
+  partnerUrls: {
+    growth: `${API_URL}/growth_partners`,
+    solution: `${API_URL}/solution_partners`,
+    provider: `${API_URL}/solution_providers`,
+    affiliate: `${API_URL}/affiliate_partners`
+  }
+};
