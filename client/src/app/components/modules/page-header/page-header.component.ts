@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-page-header',
@@ -13,4 +14,12 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PageHeaderComponent {}
+export class PageHeaderComponent {
+  constructor(
+    private authService: AuthService,
+  ) {}
+
+  logout() {
+    this.authService.logout();
+  }
+}

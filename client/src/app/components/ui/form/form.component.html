@@ -9,8 +9,11 @@
           </nz-input-group>
         </nz-form-control>
         <ng-template #emailError let-control>
-          <ng-container *ngIf="control.hasError('required')">Please input your email!</ng-container>
-          <ng-container *ngIf="control.hasError('email')">Please input a valid email!</ng-container>
+          @if (control.hasError('required')) {
+            <ng-container>Please input your email!</ng-container>
+          } @else if (control.hasError('email')) {
+            <ng-container>Please input a valid email!</ng-container>
+          }
         </ng-template>
       </nz-form-item>
 
@@ -21,7 +24,9 @@
           </nz-input-group>
         </nz-form-control>
         <ng-template #passwordError let-control>
-          <ng-container *ngIf="control.hasError('required')">Please input your password!</ng-container>
+          @if (control.hasError('required')) {
+            <ng-container>Please input your password!</ng-container>
+          }
         </ng-template>
       </nz-form-item>
 

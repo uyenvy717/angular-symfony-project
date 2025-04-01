@@ -3,8 +3,15 @@
     <div class="header-heading">
       <h1 class="text-3xl text-secondary">Partner Portal</h1>
     </div>
-    <div class="header-content content-center">
-      <p class="text-lg">Account</p>
+    <div class="header-content flex items-center">
+      <div class="flex items-baseline gap-4">
+        <p class="text-lg">Account</p>
+        <button 
+          (click)="logout()" 
+          class="px-3 py-1.5 bg-magenta text-white rounded hover:bg-magenta-dark transition-colors">
+          Logout
+        </button>
+      </div>
     </div>
   </div>
 </ng-container>

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 interface LoginResponse {
   token: string;
@@ -28,7 +29,7 @@ export class AuthService {
   private userRoles: string[] = [];
   private tokenInfo!: TokenPayload | null;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     // Initialize roles from token if it exists
     this.initializeRoles();
   }
@@ -106,6 +107,7 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     this.userRoles = [];
     this.tokenInfo = null;
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {

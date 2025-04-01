@@ -25,7 +25,13 @@ export class PartnerComponent implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string | null >(null);
   currentTab: PartnerType;
-  isSuperAdmin = false;
+  isSuperAdmin = signal<boolean>(false);
+  partnerTypes = [
+    { title: 'Growth Partner', requiresSuperAdmin: true },
+    { title: 'Solution Partner', requiresSuperAdmin: false },
+    { title: 'Solution Provider', requiresSuperAdmin: false },
+    { title: 'Affiliate Partner', requiresSuperAdmin: false },
+  ];
 
   constructor(
     private partnerService: PartnerService,
@@ -33,8 +39,8 @@ export class PartnerComponent implements OnInit {
     private message: NzMessageService
   ) {
     // Check if user is super admin
-    this.isSuperAdmin = this.authService.hasRole('ROLE_SUPER_ADMIN');
-    this.currentTab = this.isSuperAdmin ? 'growth' : 'solution';
+    this.isSuperAdmin.set(this.authService.hasRole('ROLE_SUPER_ADMIN'));
+    this.currentTab = this.isSuperAdmin() ? 'growth' : 'solution';
   }
 
   ngOnInit(): void {
@@ -44,7 +50,7 @@ export class PartnerComponent implements OnInit {
   onTabChange(index: number): void {
     let partnerTypes: PartnerType[] = [];
     // Map tab index to partner type
-    if (this.isSuperAdmin) {
+    if (this.isSuperAdmin()) {
       partnerTypes = ['growth', 'solution', 'provider', 'affiliate'];
     } else {
       partnerTypes = ['solution', 'provider', 'affiliate'];

@@ -1,65 +1,23 @@
 <h1 class="text-2xl font-bold mb-4">Partner</h1>
 <div class="partner-container">
   <nz-tabset (nzSelectedIndexChange)="onTabChange($event)">
-    <!-- Growth Partner Tab - Only show for super admin -->
-    <nz-tab *ngIf="isSuperAdmin" nzTitle="Growth Partner">
-      @if (error(); as error) {
-        <div class="error-message">
-          {{ error }}
-        </div>
-      } @else if (loading()) {
-        <div class="loading-container">
-          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-        </div>
-      } @else {
-        <app-table [data]="partners"></app-table>
+    @for (partnerType of partnerTypes; track partnerTypes) {
+      @if (!partnerType.requiresSuperAdmin || isSuperAdmin()) {
+        <nz-tab [nzTitle]="partnerType.title">
+          @if (error(); as error) {
+            <div class="error-message">
+              {{ error }}
+            </div>
+          } @else if (loading()) {
+            <div class="loading-container">
+              <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+            </div>
+          } @else {
+            <app-table [data]="partners"></app-table>
+          }
+        </nz-tab>
       }
-    </nz-tab>
-
-    <!-- Solution Partner Tab -->
-    <nz-tab nzTitle="Solution Partner">
-      @if (error(); as error) {
-        <div class="error-message">
-          {{ error }}
-        </div>
-      } @else if (loading()) {
-        <div class="loading-container">
-          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-        </div>
-      } @else {
-        <app-table [data]="partners"></app-table>
-      }
-    </nz-tab>
-
-    <!-- Solution Provider Tab -->
-    <nz-tab nzTitle="Solution Provider">
-      @if (error(); as error) {
-        <div class="error-message">
-          {{ error }}
-        </div>
-      } @else if (loading()) {
-        <div class="loading-container">
-          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-        </div>
-      } @else {
-        <app-table [data]="partners"></app-table>
-      }
-    </nz-tab>
-
-    <!-- Affiliate Partner Tab -->
-    <nz-tab nzTitle="Affiliate Partner">
-      @if (error(); as error) {
-        <div class="error-message">
-          {{ error }}
-        </div>
-      } @else if (loading()) {
-        <div class="loading-container">
-          <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
-        </div>
-      } @else {
-        <app-table [data]="partners"></app-table>
-      }
-    </nz-tab>
+    }
   </nz-tabset>
 </div>
 

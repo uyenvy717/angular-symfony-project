@@ -40,7 +40,7 @@ const routes: Routes = [
     ]
   },
   {
-    path: 'users', // Add 's'
+    path: 'users',
     component: UserComponent,
   },
   {
