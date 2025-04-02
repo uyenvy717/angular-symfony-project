@@ -4,6 +4,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { RouterLink } from '@angular/router';
 import { ModalComponent } from '../modal/modal.component';
+import { NzTagComponent } from 'ng-zorro-antd/tag';
 
 interface Column {
   title: string;
@@ -13,7 +14,14 @@ interface Column {
 
 @Component({
   selector: 'app-table',
-  imports: [CommonModule, NzTableModule, NzDividerComponent, RouterLink, ModalComponent],
+  imports: [
+    CommonModule,
+    NzTableModule,
+    NzDividerComponent,
+    RouterLink,
+    ModalComponent,
+    NzTagComponent,
+  ],
   standalone: true,
   templateUrl: './table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

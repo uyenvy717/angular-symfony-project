@@ -10,13 +10,14 @@
   <tbody>
     @for (data of basicTable.data; track data) {
       <tr>
-        <td>{{ data.name }}</td>
-        <td>{{ data.email }}</td>
-        <td>{{ data.startDate }}</td>
         @for (column of columns; track column.key) {
           <td>
             @if (column.render) {
-              {{ column.render(data) }}
+              @if (column.title === 'Account Status' || column.key === 'active') {
+                <nz-tag [nzColor]="data[column.key] ? 'success' : 'magenta'" [nzBordered]="false">{{ column.render(data) }}</nz-tag>
+              } @else {
+                {{ column.render(data) }}
+              }
             } @else {
               {{ data[column.key] }}
             }
