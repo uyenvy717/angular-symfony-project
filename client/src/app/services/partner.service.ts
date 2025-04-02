@@ -22,4 +22,13 @@ export class PartnerService {
       })
     );
   }
+
+  // Get partner by id
+  getPartner(type: PartnerType, id: string): Observable<any> {
+    return this.http.get(this.apiUrls[type] + '/' + id).pipe(
+      tap(response => {
+        console.log(`${type} Partner API Response:`, response);
+      })
+    )
+  }
 } 
