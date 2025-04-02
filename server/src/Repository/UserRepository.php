@@ -20,6 +20,10 @@ class UserRepository extends ServiceEntityRepository
 
     public function findUsersByPartner(?Partner $partner): array
     {
+        if (!$partner) {
+            return [];
+        }
+
         $query = $this->createQueryBuilder('u');
 
         if ($partner) {
@@ -36,7 +40,8 @@ class UserRepository extends ServiceEntityRepository
                 )')
                     ->setParameter('partner', $partner);
             } else {
-                $query->where('u.partner = :partner');
+                $query->where('u.partner = :partner')
+                    ->setParameter('partner', $partner);
             }
 
         }
