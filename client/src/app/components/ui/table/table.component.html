@@ -1,9 +1,9 @@
 <nz-table #basicTable [nzData]="data" [nzNoResult]="'No data available'">
   <thead>
     <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Start date</th>
+      @for (column of columns; track column.key) {
+        <th>{{ column.title }}</th>
+      }
       <th>Action</th>
     </tr>
   </thead>
@@ -13,6 +13,15 @@
         <td>{{ data.name }}</td>
         <td>{{ data.email }}</td>
         <td>{{ data.startDate }}</td>
+        @for (column of columns; track column.key) {
+          <td>
+            @if (column.render) {
+              {{ column.render(data) }}
+            } @else {
+              {{ data[column.key] }}
+            }
+          </td>
+        }
         <td>
           <a>Action 一 {{ data.name }}</a>
           <nz-divider nzType="vertical"></nz-divider>

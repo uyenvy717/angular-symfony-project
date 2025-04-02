@@ -14,6 +14,22 @@ import { UserService } from '../../services/user.service';
   providers: [NzMessageService],
 })
 export class UserComponent implements OnInit {
+  columns = [
+    {
+      title: 'Name',
+      key: 'name'
+    },
+    {
+      title: 'Account Status',
+      key: 'active',
+      render: (data: any) => data.active ? 'Active' : 'Inactive'
+    },
+    {
+      title: 'Last Seen',
+      key: 'lastLoggedIn',
+      render: (data: any) => data.lastLoggedIn ? new Date(data.lastLoggedIn).toLocaleDateString() : 'Never'
+    }
+  ];
   users: any[] = [];
   loading = signal<boolean>(false);
   error = signal<string | null >(null);

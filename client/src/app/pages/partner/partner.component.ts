@@ -21,6 +21,26 @@ import { TableComponent } from '../../components/ui/table/table.component';
   providers: [NzMessageService]
 })
 export class PartnerComponent implements OnInit {
+  columns = [
+    {
+      title: 'Name',
+      key: 'name'
+    },
+    {
+      title: 'Email',
+      key: 'email'
+    },
+    {
+      title: 'Start Date',
+      key: 'startDate',
+      render: (data: any) => data.startDate ? new Date(data.startDate).toLocaleDateString() : 'No data'
+    },
+    {
+      title: 'End Date',
+      key: 'endDate',
+      render: (data: any) => data.endDate ? new Date(data.endDate).toLocaleDateString() : 'No data'
+    },
+  ];
   partners: any[] = [];
   loading = signal<boolean>(false);
   error = signal<string | null >(null);
@@ -48,7 +68,7 @@ export class PartnerComponent implements OnInit {
   }
 
   onTabChange(index: number): void {
-    let partnerTypes: PartnerType[] = [];
+    let partnerTypes: PartnerType[];
     // Map tab index to partner type
     if (this.isSuperAdmin()) {
       partnerTypes = ['growth', 'solution', 'provider', 'affiliate'];

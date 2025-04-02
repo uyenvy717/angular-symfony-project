@@ -1,6 +1,6 @@
 <ng-container>
   <div class="flex flex-col h-screen pt-8 border-r border-gray-200">
-    @for (button of buttonLabels; track buttonLabels) {
+    @for (button of buttonLabels; track button) {
       <app-button [label]="button" (click)="navigateTo(button)"></app-button>
     }
   </div>

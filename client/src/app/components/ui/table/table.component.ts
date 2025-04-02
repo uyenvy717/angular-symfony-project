@@ -5,6 +5,12 @@ import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { RouterLink } from '@angular/router';
 import { ModalComponent } from '../modal/modal.component';
 
+interface Column {
+  title: string;
+  key: string;
+  render?: (data: any) => string;
+}
+
 @Component({
   selector: 'app-table',
   imports: [CommonModule, NzTableModule, NzDividerComponent, RouterLink, ModalComponent],
@@ -14,6 +20,7 @@ import { ModalComponent } from '../modal/modal.component';
 })
 export class TableComponent implements OnChanges {
   @Input() data: any[] = [];
+  @Input() columns: Column[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {

@@ -14,6 +14,21 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
   providers: [NzMessageService]
 })
 export class ClientComponent implements OnInit {
+  columns = [
+    {
+      title: 'Name',
+      key: 'name'
+    },
+    {
+      title: 'Email',
+      key: 'email'
+    },
+    {
+      title: 'Start Date',
+      key: 'startDate',
+      render: (data: any) => data.startDate ? new Date(data.startDate).toLocaleDateString() : 'No data'
+    },
+  ];
   clients: any[] = [];
   loading = signal<boolean>(false);
   error = signal<string | null >(null);
