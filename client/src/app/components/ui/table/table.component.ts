@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
@@ -29,6 +29,7 @@ interface Column {
 export class TableComponent implements OnChanges {
   @Input() data: any[] = [];
   @Input() columns: Column[] = [];
+  @Output() rowClick = new EventEmitter<any>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {

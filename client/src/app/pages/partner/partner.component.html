@@ -13,7 +13,7 @@
               <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
             </div>
           } @else {
-            <app-table [data]="partners" [columns]="columns"></app-table>
+            <app-table [data]="partners" [columns]="columns" (rowClick)="onRowClick($event)"></app-table>
           }
         </nz-tab>
       }

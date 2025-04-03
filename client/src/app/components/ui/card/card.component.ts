@@ -13,4 +13,5 @@ import { TableComponent } from '../table/table.component';
 export class CardComponent {
   @Input() showTable: boolean = false;
   @Input() showContent: boolean = false;
+  @Input() partnerData: any;
 }

@@ -12,3 +12,14 @@
     grid-area: metric;
   }
 }
+
+.inside-dashboard {
+  @apply grid-areas-inside-dashboard;
+  .statistic {
+    grid-area: statistic;
+  }
+
+  .list {
+    grid-area: list;
+  }
+}

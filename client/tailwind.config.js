@@ -144,6 +144,10 @@ module.exports = {
                     'statistic statistic statistic',
                     'list metric metric'
                 ],
+                'inside-dashboard': [
+                    'statistic statistic statistic',
+                    'list list list',
+                ],
                 'pp-default': [
                     'quickactions quickactions',
                     'navpanel main',

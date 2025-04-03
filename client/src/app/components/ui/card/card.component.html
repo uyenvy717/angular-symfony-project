@@ -1,13 +1,30 @@
 <!--<nz-card style="width:300px;" nzTitle="Card title" [nzExtra]="extraTemplate">-->
-<nz-card nzTitle="Card title">
+<nz-card [nzTitle]="partnerData ? 'Partner Information' : 'Card title'">
   @if (showTable) {
-    <app-table></app-table>
+<!--    <app-table></app-table>-->
   } @else if (showContent) {
-    <div>
-      <p>Card content</p>
-      <p>Card content</p>
-      <p>Card content</p>
-    </div>
+    @if (partnerData) {
+      <div class="partner-info">
+        <div class="info-item">
+          <strong>Name:</strong> {{ partnerData.name }}
+        </div>
+        <div class="info-item">
+          <strong>Email:</strong> {{ partnerData.email }}
+        </div>
+        <div class="info-item">
+          <strong>Start Date:</strong> {{ partnerData.startDate | date }}
+        </div>
+        <div class="info-item">
+          <strong>End Date:</strong> {{ partnerData.endDate | date }}
+        </div>
+      </div>
+    } @else {
+      <div>
+        <p>Card content</p>
+        <p>Card content</p>
+        <p>Card content</p>
+      </div>
+    }
   }
 </nz-card>
 <!--<ng-template #extraTemplate>-->

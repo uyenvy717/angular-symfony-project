@@ -9,7 +9,7 @@
   </thead>
   <tbody>
     @for (data of basicTable.data; track data) {
-      <tr>
+      <tr (click)="rowClick.emit(data)" style="cursor: pointer">
         @for (column of columns; track column.key) {
           <td>
             @if (column.render) {

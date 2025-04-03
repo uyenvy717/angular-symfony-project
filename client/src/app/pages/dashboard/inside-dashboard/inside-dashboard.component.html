@@ -1,13 +1,28 @@
-<h1 class="text-2xl font-bold mb-4">Inside Dashboard</h1>
-<div class="dashboard grid gap-8 gap-y-10 max-h-full">
+<h1 class="text-2xl font-bold mb-4">Partner Dashboard</h1>
+<div class="inside-dashboard grid gap-8 gap-y-10 max-h-full">
   <div class="statistic">
-    <app-card [showContent]="true"></app-card>
+    <app-card [showContent]="true" [partnerData]="partnerData"></app-card>
   </div>
-  <div class="list grid grid-rows-2 gap-y-8">
-    <app-card [showTable]="true"></app-card>
-    <app-card [showTable]="true"></app-card>
-  </div>
-  <div class="metric grid grid-rows-10 gap-y-8 ">
-    <app-card class="row-span-9" [showTable]="true"></app-card>
+  <div class="list tabs-container">
+    <nz-tabset>
+      <nz-tab nzTitle="Clients">
+        @if (loading) {
+          <div class="loading-container">
+            <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+          </div>
+        } @else {
+          <app-table [data]="clients" [columns]="clientColumns"></app-table>
+        }
+      </nz-tab>
+      <nz-tab nzTitle="Users">
+        @if (loading) {
+          <div class="loading-container">
+            <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+          </div>
+        } @else {
+          <app-table [data]="users" [columns]="userColumns"></app-table>
+        }
+      </nz-tab>
+    </nz-tabset>
   </div>
 </div>

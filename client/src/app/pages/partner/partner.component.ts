@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -43,7 +44,7 @@ export class PartnerComponent implements OnInit {
   ];
   partners: any[] = [];
   loading = signal<boolean>(false);
-  error = signal<string | null >(null);
+  error = signal<string | null>(null);
   currentTab: PartnerType;
   isSuperAdmin = signal<boolean>(false);
   partnerTypes = [
@@ -56,7 +57,8 @@ export class PartnerComponent implements OnInit {
   constructor(
     private partnerService: PartnerService,
     private authService: AuthService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private router: Router
   ) {
     // Check if user is super admin
     this.isSuperAdmin.set(this.authService.hasRole('ROLE_SUPER_ADMIN'));
@@ -94,6 +96,12 @@ export class PartnerComponent implements OnInit {
         this.loading.set(false);
         this.message.error(this.error() ?? '');
       }
+    });
+  }
+
+  onRowClick(partner: any): void {
+    this.router.navigate(['/partner', partner.id], {
+      state: { partner }
     });
   }
 }

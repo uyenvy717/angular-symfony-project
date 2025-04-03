@@ -44,7 +44,7 @@ const routes: Routes = [
     component: UserComponent,
   },
   {
-    path: 'detail',
+    path: 'partner/:id',
     component: InsideDashboardComponent,
   }
 ]

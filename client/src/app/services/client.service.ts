@@ -20,4 +20,13 @@ export class ClientService {
       })
     );
   }
+
+  // Get client by id
+  getClient(id: string): Observable<any> {
+    return this.http.get(this.apiUrl + '/' + id).pipe(
+      tap(response => {
+        console.log('Client API Response:', response);
+      })
+    )
+  }
 }

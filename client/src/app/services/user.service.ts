@@ -16,8 +16,17 @@ export class UserService {
     // const httpClients = httpResource(this.apiUrl);
     return this.http.get(this.apiUrl).pipe(
       tap(response => {
-        console.log('Clients API Response:', response);
+        console.log('Users API Response:', response);
       })
     );
+  }
+
+  // Get user by id
+  getUser(id: string): Observable<any> {
+    return this.http.get(this.apiUrl + '/' + id).pipe(
+      tap(response => {
+        console.log('User API Response:', response);
+      })
+    )
   }
 }
