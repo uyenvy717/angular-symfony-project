@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\AffiliatePartnerRepository;
@@ -21,6 +22,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
             security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
         ),
         new GetCollection(
+            provider: 'App\State\PartnerProvider.Affiliate'
+        ),
+        new GetCollection(
+            uriTemplate: '/affiliate_partners/by_registered_partner/{registeredPartnerId}',
+            uriVariables: [
+                'registeredPartnerId' => new Link(
+                    fromProperty: 'affiliatePartners',
+                    fromClass: GrowthPartner::class,
+                    identifiers: ['id']
+                )
+            ],
+            name: 'get_affiliate_partners_by_registered_partner',
             provider: 'App\State\PartnerProvider.Affiliate'
         ),
         new Post(

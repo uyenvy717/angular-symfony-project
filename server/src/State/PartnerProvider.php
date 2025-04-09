@@ -31,6 +31,19 @@ class PartnerProvider implements ProviderInterface
 
         $repository = $this->entityManager->getRepository($this->entityClass);
 
+        // Check if the route includes 'registeredPartnerId'
+        if (isset($uriVariables['registeredPartnerId'])) {
+            $registeredPartnerId = $uriVariables['registeredPartnerId'];
+            
+            // If not super admin, ensure user has access to this registered partner
+            if (!$this->security->isGranted('ROLE_SUPER_ADMIN')) {
+                throw new AccessDeniedException('Access to this partner is denied.');
+            }
+
+            // Use the repository method to filter by registered partner ID
+            return $repository->findByRegisteredPartnerId($registeredPartnerId);
+        }
+
         // If user is not a super admin, fetch only their assigned partners
         return $this->security->isGranted('ROLE_SUPER_ADMIN')
             ? $repository->findAll()
