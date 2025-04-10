@@ -31,4 +31,13 @@ export class PartnerService {
       })
     )
   }
+
+  // Get partners by registered partner
+  getByRegisteredPartner(type: PartnerType, id: string): Observable<any> {
+    return this.http.get(this.apiUrls[type] + '/by_registered_partner/' + id).pipe(
+      tap(response => {
+        console.log(`${type} Partners API Response:`, response);
+      })
+    )
+  }
 } 

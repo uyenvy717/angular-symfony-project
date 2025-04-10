@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
@@ -7,6 +7,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { PartnerService, PartnerType } from '../../services/partner.service';
 import { AuthService } from '../../services/auth.service';
 import { TableComponent } from '../../components/ui/table/table.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-partner',
@@ -22,6 +23,7 @@ import { TableComponent } from '../../components/ui/table/table.component';
   providers: [NzMessageService]
 })
 export class PartnerComponent implements OnInit {
+  @Input() partnerId?: string;
   columns = [
     {
       title: 'Name',
@@ -45,7 +47,7 @@ export class PartnerComponent implements OnInit {
   partners: any[] = [];
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
-  currentTab: PartnerType;
+  currentTab!: PartnerType;
   isSuperAdmin = signal<boolean>(false);
   partnerTypes = [
     { title: 'Growth Partner', requiresSuperAdmin: true },
@@ -60,12 +62,14 @@ export class PartnerComponent implements OnInit {
     private message: NzMessageService,
     private router: Router
   ) {
-    // Check if user is super admin
     this.isSuperAdmin.set(this.authService.hasRole('ROLE_SUPER_ADMIN'));
-    this.currentTab = this.isSuperAdmin() ? 'growth' : 'solution';
   }
 
   ngOnInit(): void {
+    if (this.partnerId) {
+      this.isSuperAdmin.set(false);
+    }
+    this.currentTab = this.isSuperAdmin() ? 'growth' : 'solution';
     this.loadPartners();
   }
 
@@ -85,7 +89,14 @@ export class PartnerComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.partnerService.getPartners(this.currentTab).subscribe({
+    let request$: Observable<any>;
+    if (this.partnerId) {
+      request$ = this.partnerService.getByRegisteredPartner(this.currentTab, this.partnerId);
+    } else {
+      request$ = this.partnerService.getPartners(this.currentTab);
+    }
+
+    request$.subscribe({
       next: (data) => {
         this.partners = data.member;
         this.loading.set(false);

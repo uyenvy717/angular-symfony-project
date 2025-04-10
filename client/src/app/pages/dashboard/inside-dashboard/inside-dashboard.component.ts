@@ -8,6 +8,7 @@ import { ClientComponent } from '../../client/client.component';
 import { UserComponent } from '../../user/user.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { PartnerComponent } from '../../partner/partner.component';
 
 interface PartnerReference {
   id: string;
@@ -21,35 +22,36 @@ interface Partner {
   endDate?: string;
   clients: PartnerReference[];
   users: PartnerReference[];
+  '@type': string;
 }
 
 @Component({
   selector: 'app-inside-dashboard',
   imports: [
-    CommonModule, 
-    CardComponent, 
+    CommonModule,
+    CardComponent,
     NzButtonModule,
     NzTabsModule,
     NzSpinModule,
     ClientComponent,
-    UserComponent
+    UserComponent,
+    PartnerComponent,
   ],
   standalone: true,
   templateUrl: './inside-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [NzMessageService]
+  providers: [NzMessageService],
 })
 export class InsideDashboardComponent implements OnInit {
   partnerData: Partner | null = null;
   loading = false;
 
-  constructor(
-    private router: Router,
-    private message: NzMessageService
-  ) {
+  constructor(private router: Router, private message: NzMessageService) {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
-      this.partnerData = (navigation.extras.state as { partner: Partner }).partner;
+      this.partnerData = (
+        navigation.extras.state as { partner: Partner }
+      ).partner;
       console.log('Partner Data:', this.partnerData);
     }
   }
@@ -60,5 +62,9 @@ export class InsideDashboardComponent implements OnInit {
       this.message.warning('No partner data available');
       return;
     }
+  }
+
+  get isGrowthPartner(): boolean {
+    return this.partnerData?.['@type'] === 'GrowthPartner';
   }
 }

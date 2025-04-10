@@ -5,10 +5,15 @@
   </div>
   <div class="list tabs-container">
     <nz-tabset>
-      <nz-tab nzTitle="Clients">
+      @if (isGrowthPartner) {
+        <nz-tab nzTitle="Partners">
+          <app-partner [partnerId]="partnerData?.id"></app-partner>
+        </nz-tab>
+      }
+      <nz-tab nzTitle="Client">
         <app-client [partnerId]="partnerData?.id"></app-client>
       </nz-tab>
-      <nz-tab nzTitle="Users">
+      <nz-tab nzTitle="User">
         <app-user [partnerId]="partnerData?.id"></app-user>
       </nz-tab>
     </nz-tabset>
