@@ -45,4 +45,17 @@ class ClientRepository extends ServiceEntityRepository
 
         return $query->getQuery()->getResult();
     }
+
+    public function findClientsByPartnerId(string $partnerId): array
+    {
+        $partner = $this->getEntityManager()
+            ->getRepository(Partner::class)
+            ->find($partnerId);
+
+        if (!$partner) {
+            return [];
+        }
+
+        return $this->findClientsByPartner($partner);
+    }
 }

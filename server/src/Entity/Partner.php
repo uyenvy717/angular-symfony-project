@@ -27,7 +27,7 @@ abstract class Partner implements IDable
 {
     use IDScheme;
 
-    #[Groups(['read', 'post', 'patch'])]
+    #[Groups(['read', 'post', 'patch', 'client:read'])]
     #[ORM\Column(length: 255)]
     private string $name;
 

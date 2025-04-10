@@ -92,6 +92,7 @@ class AffiliatePartner extends Partner
         $this->registeredPartner = $partner;
     }
 
+    #[Groups(['client:read'])]
     public function getRegisteredPartner(): ?GrowthPartner
     {
         return $this->registeredPartner;
@@ -101,5 +102,11 @@ class AffiliatePartner extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
+    }
+
+    #[Groups(['client:read'])]
+    public function getRegisteredPartnerName(): ?string
+    {
+        return $this->registeredPartner?->getName();
     }
 }
