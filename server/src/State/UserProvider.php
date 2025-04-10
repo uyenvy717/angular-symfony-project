@@ -56,12 +56,6 @@ class UserProvider implements ProviderInterface
             return $userRepository->findUsersByPartnerId($registeredPartnerId);
         }
 
-
-        // If the user is a super admin, just return all users
-        if ($this->security->isGranted('ROLE_SUPER_ADMIN')) {
-            return $userRepository->findAll();
-        } else {
-            return $userRepository->findUsersByPartner($user->getPartner());
-        }
+       return $userRepository->findUsersByPartner($user->getPartner());
     }
 }

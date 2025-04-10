@@ -46,6 +46,12 @@ const routes: Routes = [
   {
     path: 'partner/:id',
     component: InsideDashboardComponent,
+    // children: [
+    //   { path: '', redirectTo: 'partners', pathMatch: 'full' },
+    //   { path: 'partners', component: PartnerComponent },
+    //   { path: 'clients', component: ClientComponent },
+    //   { path: 'users', component: UserComponent }
+    // ]
   }
 ]
 

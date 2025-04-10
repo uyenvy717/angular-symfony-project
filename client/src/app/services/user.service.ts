@@ -29,4 +29,13 @@ export class UserService {
       })
     )
   }
+
+  // Get users by registered partner
+  getUsersByPartner(id: string): Observable<any> {
+    return this.http.get(this.apiUrl + '/by_registered_partner/' + id).pipe(
+      tap(response => {
+        console.log('Users API Response:', response);
+      })
+    )
+  }
 }

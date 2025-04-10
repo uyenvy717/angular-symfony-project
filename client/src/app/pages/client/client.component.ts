@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '../../components/ui/table/table.component';
 import { ClientService } from '../../services/client.service';
-import { PartnerService } from '../../services/partner.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { forkJoin, map } from 'rxjs';
+import { Observable } from 'rxjs';
 
 interface Client {
   '@id': string;
@@ -13,7 +12,13 @@ interface Client {
   active: boolean;
   email: string;
   name: string;
-  partner: string;
+  partner: {
+    '@id': string;
+    '@type': string;
+    registeredPartner?: string;
+    registeredPartnerName?: string;
+    name: string;
+  };
   startDate: string;
   partnerName?: string;
 }
@@ -27,6 +32,8 @@ interface Client {
   providers: [NzMessageService]
 })
 export class ClientComponent implements OnInit {
+  @Input() partnerId?: string;
+
   columns = [
     {
       title: 'Name',
@@ -43,8 +50,23 @@ export class ClientComponent implements OnInit {
     },
     {
       title: 'Registered Partner',
-      key: 'partnerName',
-      render: (data: Client) => data.partnerName || 'Loading...'
+      key: 'partner.name',
+      render: (data: Client) => {
+        if (data.partner['@type'] === 'GrowthPartner') {
+          return '';
+        }
+        return data.partner.name;
+      }
+    },
+    {
+      title: 'Registered Growth Partner',
+      key: 'partner.registeredPartnerName',
+      render: (data: Client) => {
+        if (data.partner['@type'] === 'GrowthPartner') {
+          return data.partner.name;
+        }
+        return data.partner.registeredPartnerName || '';
+      }
     }
   ];
   clients: Client[] = [];
@@ -53,7 +75,6 @@ export class ClientComponent implements OnInit {
 
   constructor(
     private clientService: ClientService,
-    private partnerService: PartnerService,
     private message: NzMessageService
   ) {}
 
@@ -65,40 +86,18 @@ export class ClientComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.clientService.getClients().subscribe({
-      next: (data) => {
-        const clients = data.member as Client[];
-        
-        // Create an array of observables to fetch partner information
-        const partnerRequests = clients.map((client: Client) => {
-          // Extract partner ID from the partner URL
-          const partnerId = client.partner.split('/').pop() ?? '';
-          // Determine partner type from the URL
-          const partnerType = client.partner.includes('solution_partners') ? 'solution' : 
-                            client.partner.includes('growth_partners') ? 'growth' :
-                            client.partner.includes('solution_providers') ? 'provider' : 'affiliate';
-          
-          return this.partnerService.getPartner(partnerType, partnerId).pipe(
-            map(partner => ({
-              ...client,
-              partnerName: partner.name
-            }))
-          );
-        });
+    let request$: Observable<any>;
+    if (this.partnerId) {
+      request$ = this.clientService.getClientsByPartner(this.partnerId);
+    } else {
+      request$ = this.clientService.getClients();
+    }
 
-        // Use forkJoin to fetch all partner information in parallel
-        forkJoin(partnerRequests).subscribe({
-          next: (clientsWithPartners) => {
-            this.clients = clientsWithPartners;
-            this.loading.set(false);
-          },
-          error: (error) => {
-            console.error('Error loading partner information:', error);
-            this.error.set('Failed to load partner information');
-            this.loading.set(false);
-            this.message.error(this.error() ?? '');
-          }
-        });
+    request$.subscribe({
+      next: (data) => {
+        console.log('Clients data:', data);
+        this.clients = data.member;
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading clients:', error);

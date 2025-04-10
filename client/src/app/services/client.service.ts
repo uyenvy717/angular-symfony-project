@@ -29,4 +29,13 @@ export class ClientService {
       })
     )
   }
+
+  // Get client by registered partner
+  getClientsByPartner(id: string): Observable<any> {
+    return this.http.get(this.apiUrl + '/by_registered_partner/' + id).pipe(
+      tap(response => {
+        console.log('Clients API Response:', response);
+      })
+    )
+  }
 }
