@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
@@ -30,6 +31,18 @@ use Symfony\Component\Serializer\Attribute\Ignore;
                 or object.getPartner().getRegisteredPartner() == user.getPartner()"
         ),
         new GetCollection(
+            provider: UserProvider::class
+        ),
+        new GetCollection(
+            uriTemplate: '/users/by_registered_partner/{registeredPartnerId}',
+            uriVariables: [
+                'registeredPartnerId' => new Link(
+                    fromProperty: 'users',
+                    fromClass: Partner::class,
+                    identifiers: ['id']
+                )
+            ],
+            name: 'get_users_by_registered_partner',
             provider: UserProvider::class
         ),
         new Post(

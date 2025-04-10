@@ -52,10 +52,6 @@ class ClientRepository extends ServiceEntityRepository
             ->getRepository(Partner::class)
             ->find($partnerId);
 
-        if (!$partner) {
-            return [];
-        }
-
         return $this->findClientsByPartner($partner);
     }
 }
