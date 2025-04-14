@@ -1,20 +1,20 @@
 <h1 class="text-2xl font-bold mb-4">Partner Dashboard</h1>
 <div class="inside-dashboard grid gap-8 gap-y-10 max-h-full">
   <div class="statistic">
-    <app-card [showContent]="true" [partnerData]="partnerData"></app-card>
+    <app-card [showContent]="true" [partnerData]="partnerData()"></app-card>
   </div>
   <div class="list tabs-container">
     <nz-tabset>
       @if (isGrowthPartner) {
         <nz-tab nzTitle="Partners">
-          <app-partner [partnerId]="partnerData?.id"></app-partner>
+          <app-partner [partnerId]="partnerData()?.id"></app-partner>
         </nz-tab>
       }
       <nz-tab nzTitle="Client">
-        <app-client [partnerId]="partnerData?.id"></app-client>
+        <app-client [partnerId]="partnerData()?.id"></app-client>
       </nz-tab>
       <nz-tab nzTitle="User">
-        <app-user [partnerId]="partnerData?.id"></app-user>
+        <app-user [partnerId]="partnerData()?.id"></app-user>
       </nz-tab>
     </nz-tabset>
   </div>

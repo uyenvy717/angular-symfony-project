@@ -111,8 +111,10 @@ export class PartnerComponent implements OnInit {
   }
 
   onRowClick(partner: any): void {
-    this.router.navigate(['/partner', partner.id], {
-      state: { partner }
+    // Navigate to partner detail page with partner data and type in state
+    const currentUrl = this.router.url;
+    this.router.navigate([currentUrl, partner.id], {
+      state: { partner, partnerType: this.currentTab }
     });
   }
 }
