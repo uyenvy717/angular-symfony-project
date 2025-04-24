@@ -2,36 +2,24 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  OnDestroy,
   OnInit,
-  signal
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from '../../../components/ui/card/card.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { ClientComponent } from '../../client/client.component';
 import { UserComponent } from '../../user/user.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { PartnerComponent } from '../../partner/partner.component';
-import { Subscription } from 'rxjs';
-
-interface PartnerReference {
-  id: string;
-}
-
-interface Partner {
-  id?: string;
-  name: string;
-  email: string;
-  startDate?: string;
-  endDate?: string;
-  clients: PartnerReference[];
-  users: PartnerReference[];
-  '@type': string;
-}
+import {
+  ExtendedPartnerDto,
+  PartnerTypeEnum,
+} from 'src/app/services/partner.service';
+import { ClientJsonldClientApiRead, UserApiJsonld } from '../../../api/models';
 
 @Component({
   selector: 'app-inside-dashboard',
@@ -44,45 +32,49 @@ interface Partner {
     ClientComponent,
     UserComponent,
     PartnerComponent,
+    RouterOutlet,
   ],
   standalone: true,
   templateUrl: './inside-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [NzMessageService],
 })
-export class InsideDashboardComponent implements OnInit, OnDestroy {
-  private partnerDataSignal = signal<Partner | null>(null);
-  partnerData = computed(() => this.partnerDataSignal());
-  private paramsSub?: Subscription;
+export class InsideDashboardComponent implements OnInit {
+  partnerData = signal<ExtendedPartnerDto | null>(null);
+  partnerId = computed(() => this.partnerData()?.id ?? '');
+  isGrowthPartner = computed(
+    () => this.partnerData()?.['@type'] === PartnerTypeEnum.GROWTH
+  );
+  clientData = signal<ClientJsonldClientApiRead | null>(null);
+  userData = signal<UserApiJsonld | null>(null);
 
   constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    // Subscribe to both params and state changes
-    this.paramsSub = this.route.params.subscribe(params => {
-      const id = params['subId'] || params['id'];
-      const state = window.history.state;
+    this.activatedRoute.data.subscribe(({ partner, client, user }) => {
+      if (partner) {
+        this.partnerData.set(partner);
+        if (!this.partnerData()) {
+          this.message.warning('No partner data found');
+        }
+      }
 
-      if (state.partner && (state.partner.id === id)
-      ) {
-        this.partnerDataSignal.set(state.partner);
-      } else {
-        this.partnerDataSignal.set(null);
-        this.message.warning('No partner data found in state');
-        this.router.navigate(['/partners']);
+      if (client) {
+        this.clientData.set(client);
+        if (!this.clientData()) {
+          this.message.warning('No client data found');
+        }
+      }
+
+      if (user) {
+        this.userData.set(user);
+        if (!this.userData()) {
+          this.message.warning('No user data found');
+        }
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    this.paramsSub?.unsubscribe();
-  }
-
-  get isGrowthPartner(): boolean {
-    return this.partnerData()?.['@type'] === 'GrowthPartner';
   }
 }

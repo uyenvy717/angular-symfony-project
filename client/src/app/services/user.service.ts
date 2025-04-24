@@ -1,41 +1,31 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { Observable, tap } from 'rxjs';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { tap } from 'rxjs';
+import { ApiUserService } from '../api/services';
+import { UserApiJsonld } from '../api/models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
-  private apiUrl = environment.userUrl;
+  private readonly service = inject(ApiUserService);
+  private users = signal<UserApiJsonld[]>([]);
+  selectedUser = signal<UserApiJsonld | null>(null);
 
-  constructor(private http: HttpClient) { }
-
-  getUsers(): Observable<any> {
-    // TODO use httpResource instead
-    // const httpClients = httpResource(this.apiUrl);
-    return this.http.get(this.apiUrl).pipe(
-      tap(response => {
-        console.log('Users API Response:', response);
-      })
-    );
+  fetchUsers() {
+    return this.service
+      .apiUsersGetCollection()
+      .pipe(tap((response) => this.users.set(response.member)));
   }
 
-  // Get user by id
-  getUser(id: string): Observable<any> {
-    return this.http.get(this.apiUrl + '/' + id).pipe(
-      tap(response => {
-        console.log('User API Response:', response);
-      })
-    )
+  fetchByRegisteredPartner(id: string) {
+    return this.service
+      .getUsersByRegisteredPartner({ registeredPartnerId: id })
+      .pipe(tap((response) => this.users.set(response.member)));
   }
 
-  // Get users by registered partner
-  getUsersByPartner(id: string): Observable<any> {
-    return this.http.get(this.apiUrl + '/by_registered_partner/' + id).pipe(
-      tap(response => {
-        console.log('Users API Response:', response);
-      })
-    )
+  setSelectedUser(user: UserApiJsonld) {
+    this.selectedUser.set(user);
   }
+
+  getSelectedUser = computed(() => this.selectedUser());
 }

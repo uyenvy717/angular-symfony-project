@@ -1,13 +1,25 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { PartnerService, PartnerType } from '../../services/partner.service';
+import {
+  ExtendedPartnerDto,
+  PartnerService,
+  PartnerType,
+  PartnerTypeEnum,
+} from '../../services/partner.service';
 import { AuthService } from '../../services/auth.service';
 import { TableComponent } from '../../components/ui/table/table.component';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-partner',
@@ -15,73 +27,82 @@ import { Observable } from 'rxjs';
     CommonModule,
     NzTabsModule,
     NzSpinModule,
-    TableComponent
+    TableComponent,
+    RouterOutlet,
   ],
   standalone: true,
   templateUrl: './partner.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [NzMessageService]
+  providers: [NzMessageService],
 })
 export class PartnerComponent implements OnInit {
-  @Input() partnerId?: string;
+  partnerId = input<string>('');
+
   columns = [
     {
       title: 'Name',
-      key: 'name'
+      key: 'name',
     },
     {
       title: 'Email',
-      key: 'email'
+      key: 'email',
     },
     {
       title: 'Start Date',
       key: 'startDate',
-      render: (data: any) => data.startDate ? new Date(data.startDate).toLocaleDateString() : 'No data'
+      render: (data: ExtendedPartnerDto) =>
+        data.startDate
+          ? new Date(data.startDate).toLocaleDateString()
+          : 'No data',
     },
     {
       title: 'End Date',
       key: 'endDate',
-      render: (data: any) => data.endDate ? new Date(data.endDate).toLocaleDateString() : 'No data'
+      render: (data: ExtendedPartnerDto) =>
+        data.endDate ? new Date(data.endDate).toLocaleDateString() : 'No data',
     },
   ];
-  partners: any[] = [];
+  partners = signal<ExtendedPartnerDto[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
-  currentTab!: PartnerType;
-  isSuperAdmin = signal<boolean>(false);
-  partnerTypes = [
-    { title: 'Growth Partner', requiresSuperAdmin: true },
-    { title: 'Solution Partner', requiresSuperAdmin: false },
-    { title: 'Solution Provider', requiresSuperAdmin: false },
-    { title: 'Affiliate Partner', requiresSuperAdmin: false },
-  ];
+  currentTab = signal<PartnerType>(PartnerTypeEnum.SOLUTION);
+  private partnerService = inject(PartnerService);
+  private authService = inject(AuthService);
+  adminViewMode = computed(
+    () => this.partnerId() === '' && this.authService.isSuperAdmin()
+  );
+  partnerTabs = computed(() => [
+    { title: 'Growth Partner', isTabVisible: this.adminViewMode() },
+    { title: 'Solution Partner', isTabVisible: true },
+    { title: 'Solution Provider', isTabVisible: true },
+    { title: 'Affiliate Partner', isTabVisible: true },
+  ]);
 
   constructor(
-    private partnerService: PartnerService,
-    private authService: AuthService,
     private message: NzMessageService,
-    private router: Router
-  ) {
-    this.isSuperAdmin.set(this.authService.hasRole('ROLE_SUPER_ADMIN'));
-  }
+    public router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    if (this.partnerId) {
-      this.isSuperAdmin.set(false);
-    }
-    this.currentTab = this.isSuperAdmin() ? 'growth' : 'solution';
+    this.currentTab.set(
+      this.adminViewMode() ? PartnerTypeEnum.GROWTH : PartnerTypeEnum.SOLUTION
+    );
     this.loadPartners();
   }
 
   onTabChange(index: number): void {
-    let partnerTypes: PartnerType[];
     // Map tab index to partner type
-    if (this.isSuperAdmin()) {
-      partnerTypes = ['growth', 'solution', 'provider', 'affiliate'];
-    } else {
-      partnerTypes = ['solution', 'provider', 'affiliate'];
+    const partnerTypes = [
+      PartnerTypeEnum.SOLUTION,
+      PartnerTypeEnum.PROVIDER,
+      PartnerTypeEnum.AFFILIATE,
+    ];
+    if (this.adminViewMode()) {
+      partnerTypes.unshift(PartnerTypeEnum.GROWTH);
     }
-    this.currentTab = partnerTypes[index];
+
+    this.currentTab.set(partnerTypes[index]);
     this.loadPartners();
   }
 
@@ -89,32 +110,57 @@ export class PartnerComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    let request$: Observable<any>;
-    if (this.partnerId) {
-      request$ = this.partnerService.getByRegisteredPartner(this.currentTab, this.partnerId);
+    if (this.authService.isSuperAdmin() && this.adminViewMode()) {
+      this.partnerService.fetchPartners().subscribe({
+        next: () => {
+          const filtered = this.partnerService.getPartnerByType(
+            this.currentTab()
+          );
+          this.partners.set(filtered);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load partners:', err);
+          this.loading.set(false);
+          this.error.set('Failed to load partners');
+          this.message.error('Failed to load partners');
+        },
+      });
+    } else if (this.authService.isSuperAdmin() && !this.adminViewMode()) {
+      this.partnerService
+        .fetchByRegisteredPartner(this.currentTab(), this.partnerId())
+        .subscribe({
+          next: (partners) => {
+            this.partners.set(partners.member);
+            this.loading.set(false);
+          },
+          error: (err) => {
+            console.error('Failed to load partners:', err);
+            this.loading.set(false);
+            this.error.set('Failed to load partners');
+            this.message.error('Failed to load partners');
+          },
+        });
     } else {
-      request$ = this.partnerService.getPartners(this.currentTab);
+      this.partnerService
+        .fetchByType(this.currentTab(), this.partnerId())
+        .subscribe({
+          next: (partners) => {
+            this.partners.set(partners.member);
+            this.loading.set(false);
+          },
+          error: (err) => {
+            console.error('Failed to load partners:', err);
+            this.loading.set(false);
+            this.error.set('Failed to load partners');
+            this.message.error('Failed to load partners');
+          },
+        });
     }
-
-    request$.subscribe({
-      next: (data) => {
-        this.partners = data.member;
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading partners:', error);
-        this.error.set('Failed to load partners');
-        this.loading.set(false);
-        this.message.error(this.error() ?? '');
-      }
-    });
   }
 
-  onRowClick(partner: any): void {
-    // Navigate to partner detail page with partner data and type in state
-    const currentUrl = this.router.url;
-    this.router.navigate([currentUrl, partner.id], {
-      state: { partner, partnerType: this.currentTab }
-    });
+  onRowClick(partner: ExtendedPartnerDto): void {
+    this.partnerService.setSelectedPartner(partner);
+    this.router.navigate([partner.id], { relativeTo: this.route });
   }
 }

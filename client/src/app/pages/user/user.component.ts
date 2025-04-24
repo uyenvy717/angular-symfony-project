@@ -1,10 +1,18 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '../../components/ui/table/table.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { UserService } from '../../services/user.service';
-import { Observable } from 'rxjs';
+import { UserApiJsonld } from '../../api/models';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-user',
@@ -20,26 +28,31 @@ export class UserComponent implements OnInit {
   columns = [
     {
       title: 'Name',
-      key: 'name'
+      key: 'name',
     },
     {
       title: 'Account Status',
       key: 'active',
-      render: (data: any) => data.active ? 'Active' : 'Inactive'
+      render: (data: UserApiJsonld) => (data.active ? 'Active' : 'Inactive'),
     },
     {
       title: 'Last Seen',
       key: 'lastLoggedIn',
-      render: (data: any) => data.lastLoggedIn ? new Date(data.lastLoggedIn).toLocaleDateString() : 'Never'
-    }
+      render: (data: UserApiJsonld) =>
+        data.lastLoggedIn
+          ? new Date(data.lastLoggedIn).toLocaleDateString()
+          : 'Never',
+    },
   ];
-  users: any[] = [];
+  users = signal<UserApiJsonld[]>([]);
   loading = signal<boolean>(false);
-  error = signal<string | null >(null);
+  error = signal<string | null>(null);
+  private userService = inject(UserService);
 
   constructor(
-    private userService: UserService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -50,25 +63,38 @@ export class UserComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    let request$: Observable<any>;
     if (this.partnerId) {
-      request$ = this.userService.getUsersByPartner(this.partnerId);
+      this.userService.fetchByRegisteredPartner(this.partnerId).subscribe({
+        next: (users) => {
+          this.users.set(users.member);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load users:', err);
+          this.loading.set(false);
+          this.error.set('Failed to load users');
+          this.message.error('Failed to load users');
+        },
+      });
     } else {
-      request$ = this.userService.getUsers();
+      this.userService.fetchUsers().subscribe({
+        next: (users) => {
+          this.users.set(users.member);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load users:', err);
+          this.loading.set(false);
+          this.error.set('Failed to load users');
+          this.message.error('Failed to load users');
+        },
+      });
     }
+  }
 
-    request$.subscribe({
-      next: (data) => {
-        console.log('Users data:', data);
-        this.users = data.member;
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading users:', error);
-        this.error.set('Failed to load users');
-        this.loading.set(false);
-        this.message.error(this.error() ?? '');
-      }
-    });
+  onRowClick(user: UserApiJsonld) {
+    this.userService.setSelectedUser(user);
+    // this.router.navigate([user.id], { relativeTo: this.route });
+    this.router.navigate(['/users', user.id]);
   }
 }

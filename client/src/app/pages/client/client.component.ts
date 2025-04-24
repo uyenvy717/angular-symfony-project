@@ -1,10 +1,18 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableComponent } from '../../components/ui/table/table.component';
 import { ClientService } from '../../services/client.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { Observable } from 'rxjs';
+import { ClientJsonldClientApiRead } from '../../api/models';
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface Client {
   '@id': string;
@@ -46,36 +54,38 @@ export class ClientComponent implements OnInit {
     {
       title: 'Start Date',
       key: 'startDate',
-      render: (data: Client) => data.startDate ? new Date(data.startDate).toLocaleDateString() : 'No data'
+      render: (data: ClientJsonldClientApiRead) => data.startDate ? new Date(data.startDate).toLocaleDateString() : 'No data'
     },
     {
       title: 'Registered Partner',
       key: 'partner.name',
-      render: (data: Client) => {
-        if (data.partner['@type'] === 'GrowthPartner') {
+      render: (data: ClientJsonldClientApiRead) => {
+        if (data.partner?.['@type'] === 'GrowthPartner') {
           return '';
         }
-        return data.partner.name;
+        return data.partner?.name || '';
       }
     },
     {
       title: 'Registered Growth Partner',
       key: 'partner.registeredPartnerName',
       render: (data: Client) => {
-        if (data.partner['@type'] === 'GrowthPartner') {
-          return data.partner.name;
+        if (data.partner?.['@type'] === 'GrowthPartner') {
+          return data.partner.name || '';
         }
-        return data.partner.registeredPartnerName || '';
+        return data.partner?.registeredPartnerName || '';
       }
     }
   ];
-  clients: Client[] = [];
+  clients = signal<ClientJsonldClientApiRead[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+  private clientService = inject(ClientService);
 
   constructor(
-    private clientService: ClientService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -86,25 +96,46 @@ export class ClientComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    let request$: Observable<any>;
     if (this.partnerId) {
-      request$ = this.clientService.getClientsByPartner(this.partnerId);
+      this.clientService.fetchByRegisteredPartner(this.partnerId).subscribe({
+        next: (clients) => {
+          this.clients.set(clients.member);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading clients:', err);
+          this.loading.set(false);
+          this.error.set('Failed to load clients');
+          this.message.error('Failed to load clients');
+        }
+      });
     } else {
-      request$ = this.clientService.getClients();
+      this.clientService.fetchClients().subscribe({
+        next: (clients) => {
+          this.clients.set(clients.member);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading clients:', err);
+          this.loading.set(false);
+          this.error.set('Failed to load clients');
+          this.message.error('Failed to load clients');
+        }
+      });
     }
+  }
 
-    request$.subscribe({
-      next: (data) => {
-        console.log('Clients data:', data);
-        this.clients = data.member;
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading clients:', error);
-        this.error.set('Failed to load clients');
-        this.loading.set(false);
-        this.message.error(this.error() ?? '');
-      }
-    });
+  onRowClick(client: ClientJsonldClientApiRead) {
+    this.clientService.setSelectedClient(client);
+    if (!client['@id']) {
+      this.message.error('Invalid client ID');
+      return;
+    }
+    const id = client['@id'].split('/').pop() || '';
+    if (!id) {
+      this.message.error('Invalid client ID');
+      return;
+    }
+    this.router.navigate(['/clients', id]);
   }
 }

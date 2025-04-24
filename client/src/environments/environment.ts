@@ -12,7 +12,7 @@ interface Environment {
   userUrl: string;
 }
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'http://localhost:8000';
 
 export const environment: Environment = {
   production: false,

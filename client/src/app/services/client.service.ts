@@ -1,41 +1,31 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { Observable, tap } from 'rxjs';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { tap } from 'rxjs';
+import { ApiClientService } from '../api/services';
+import { ClientJsonldClientApiRead } from '../api/models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ClientService {
-  private apiUrl = environment.clientUrl;
+  private readonly service = inject(ApiClientService);
+  private clients = signal<ClientJsonldClientApiRead[]>([]);
+  selectedClient = signal<ClientJsonldClientApiRead | null>(null);
 
-  constructor(private http: HttpClient) { }
-
-  getClients(): Observable<any> {
-    // TODO use httpResource instead
-    // const httpClients = httpResource(this.apiUrl);
-    return this.http.get(this.apiUrl).pipe(
-      tap(response => {
-        console.log('Clients API Response:', response);
-      })
-    );
+  fetchClients() {
+    return this.service
+      .apiClientsGetCollection()
+      .pipe(tap((response) => this.clients.set(response.member)));
   }
 
-  // Get client by id
-  getClient(id: string): Observable<any> {
-    return this.http.get(this.apiUrl + '/' + id).pipe(
-      tap(response => {
-        console.log('Client API Response:', response);
-      })
-    )
+  fetchByRegisteredPartner(id: string) {
+    return this.service
+      .getClientsByRegisteredPartner({ registeredPartnerId: id })
+      .pipe(tap((response) => this.clients.set(response.member)));
   }
 
-  // Get client by registered partner
-  getClientsByPartner(id: string): Observable<any> {
-    return this.http.get(this.apiUrl + '/by_registered_partner/' + id).pipe(
-      tap(response => {
-        console.log('Clients API Response:', response);
-      })
-    )
+  setSelectedClient(client: ClientJsonldClientApiRead) {
+    this.selectedClient.set(client);
   }
+
+  getSelectedClient = computed(() => this.selectedClient());
 }

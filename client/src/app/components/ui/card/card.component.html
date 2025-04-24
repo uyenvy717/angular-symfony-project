@@ -1,7 +1,5 @@
-<!--<nz-card style="width:300px;" nzTitle="Card title" [nzExtra]="extraTemplate">-->
-<nz-card [nzTitle]="partnerData ? 'Partner Information' : 'Card title'">
+<nz-card [nzTitle]="partnerData ? 'Partner Information' : clientData? 'Client Information' : userData? 'User Information' : 'Card title'">
   @if (showTable) {
-<!--    <app-table></app-table>-->
   } @else if (showContent) {
     @if (partnerData) {
       <div class="partner-info">
@@ -18,6 +16,30 @@
           <strong>End Date:</strong> {{ partnerData.endDate | date }}
         </div>
       </div>
+    } @else if (clientData) {
+      <div class="partner-info">
+        <div class="info-item">
+          <strong>Name:</strong> {{ clientData.name }}
+        </div>
+        <div class="info-item">
+          <strong>Email:</strong> {{ clientData.email }}
+        </div>
+        <div class="info-item">
+          <strong>Start Date:</strong> {{ clientData.startDate | date }}
+        </div>
+      </div>
+    } @else if (userData) {
+      <div class="partner-info">
+        <div class="info-item">
+          <strong>Name:</strong> {{ userData.name }}
+        </div>
+        <div class="info-item">
+          <strong>Status:</strong> {{ userData.active }}
+        </div>
+<!--        <div class="info-item">-->
+<!--          <strong>Start Date:</strong> {{ clientData.startDate | date }}-->
+<!--        </div>-->
+      </div>
     } @else {
       <div>
         <p>Card content</p>
@@ -27,6 +49,3 @@
     }
   }
 </nz-card>
-<!--<ng-template #extraTemplate>-->
-<!--  <a>More</a>-->
-<!--</ng-template>-->

@@ -1,8 +1,8 @@
 <h1 class="text-2xl font-bold mb-4">Partner</h1>
 <div class="partner-container">
   <nz-tabset (nzSelectedIndexChange)="onTabChange($event)">
-    @for (partnerType of partnerTypes; track partnerType) {
-      @if (!partnerType.requiresSuperAdmin || isSuperAdmin()) {
+    @for (partnerType of partnerTabs(); track partnerType) {
+      @if (partnerType.isTabVisible) {
         <nz-tab [nzTitle]="partnerType.title">
           @if (error(); as error) {
             <div class="error-message">
@@ -13,7 +13,7 @@
               <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
             </div>
           } @else {
-            <app-table [data]="partners" [columns]="columns" (rowClick)="onRowClick($event)"></app-table>
+            <app-table [data]="partners()" [columns]="columns" (rowClick)="onRowClick($event)"></app-table>
           }
         </nz-tab>
       }

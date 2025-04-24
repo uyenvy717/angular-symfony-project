@@ -22,7 +22,9 @@ use Symfony\Component\Serializer\Attribute\Groups;
         "affiliate_partners" => AffiliatePartner::class
     ]
 )]
-#[ApiResource]
+#[ApiResource(
+    security: "is_granted('ROLE_SUPER_ADMIN')"
+)]
 abstract class Partner implements IDable
 {
     use IDScheme;

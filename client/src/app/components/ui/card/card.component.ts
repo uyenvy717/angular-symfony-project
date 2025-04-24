@@ -11,7 +11,9 @@ import { TableComponent } from '../table/table.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @Input() showTable: boolean = false;
-  @Input() showContent: boolean = false;
+  @Input() showTable = false;
+  @Input() showContent = false;
   @Input() partnerData: any;
+  @Input() clientData: any;
+  @Input() userData: any;
 }

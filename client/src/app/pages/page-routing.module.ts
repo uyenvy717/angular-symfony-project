@@ -1,10 +1,13 @@
 import { RouterModule, Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
+import { inject, NgModule } from '@angular/core';
 import { DashboardComponent } from './dashboard/main-dashboard/dashboard.component';
 import { PartnerComponent } from './partner/partner.component';
 import { ClientComponent } from './client/client.component';
 import { UserComponent } from './user/user.component';
 import { InsideDashboardComponent } from './dashboard/inside-dashboard/inside-dashboard.component';
+import { PartnerService } from '../services/partner.service';
+import { ClientService } from '../services/client.service';
+import { UserService } from '../services/user.service';
 
 const routes: Routes = [
   {
@@ -13,36 +16,58 @@ const routes: Routes = [
   },
   {
     path: 'partners',
-    component: PartnerComponent,
-  },
-  {
-    path: 'clients',
-    component: ClientComponent,
-  },
-  // {
-  //   path: 'client/:id',
-  //   children: [
-  //     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  //     { path: 'dashboard', component: DashboardComponent },
-  //     { path: 'users', component: UserComponent },
-  //   ],
-  // },
-  {
-    path: 'users',
-    component: UserComponent,
-  },
-  {
-    path: 'partners/:id',
     children: [
       {
         path: '',
-        component: InsideDashboardComponent
+        component: PartnerComponent,
       },
       {
-        path: ':subId',
-        component: InsideDashboardComponent
-      }
-    ]
+        path: ':id',
+        component: InsideDashboardComponent,
+        resolve: {
+          partner: () => inject(PartnerService).getSelectedPartner(),
+        },
+      },
+      {
+        path: ':id/:subId',
+        component: InsideDashboardComponent,
+        resolve: {
+          partner: () => inject(PartnerService).getSelectedPartner(),
+        },
+      },
+    ],
+  },
+  {
+    path: 'clients',
+    children: [
+      {
+        path: '',
+        component: ClientComponent,
+      },
+      {
+        path: ':id',
+        component: InsideDashboardComponent,
+        resolve: {
+          client: () => inject(ClientService).getSelectedClient(),
+        },
+      },
+    ],
+  },
+  {
+    path: 'users',
+    children: [
+      {
+        path: '',
+        component: UserComponent,
+      },
+      {
+        path: ':id',
+        component: InsideDashboardComponent,
+        resolve: {
+          user: () => inject(UserService).getSelectedUser(),
+        },
+      },
+    ],
   },
 ];
 

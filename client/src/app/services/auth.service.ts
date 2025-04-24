@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
+import { computed, Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
@@ -26,7 +26,8 @@ interface TokenPayload {
 export class AuthService {
   private apiUrl = environment.authUrl;
   private tokenKey = 'auth_token';
-  private userRoles: string[] = [];
+  private userRoles = signal<string[]>([]);
+  private user = signal<{ userRoles: [], userName: string, email: string, lastLoginDate: string } | null >(null);
   private tokenInfo!: TokenPayload | null;
 
   constructor(private http: HttpClient, private router: Router) {
@@ -40,13 +41,15 @@ export class AuthService {
     if (isExpired) {
       this.logout();
     } else if (this.tokenInfo && this.tokenInfo.roles) {
-      this.userRoles = this.tokenInfo.roles;
+      this.userRoles.set(this.tokenInfo.roles);
     }
   }
 
+  isSuperAdmin = computed(() =>  this.userRoles().includes('ROLE_SUPER_ADMIN'))
+
   // Check if user has a specific role
   hasRole(role: string): boolean {
-    return this.userRoles.includes(role);
+    return this.userRoles().includes(role);
   }
 
   // Check if user's partner type is GrowthPartner
@@ -105,7 +108,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
-    this.userRoles = [];
+    this.userRoles.set([]);
     this.tokenInfo = null;
     this.router.navigate(['/login']);
   }

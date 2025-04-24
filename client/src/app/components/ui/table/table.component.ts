@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
@@ -36,8 +44,4 @@ export class TableComponent implements OnChanges {
       console.log('Table data changed:', this.data);
     }
   }
-
-  // showModal() {
-  //   ModalComponent;
-  // }
 }
