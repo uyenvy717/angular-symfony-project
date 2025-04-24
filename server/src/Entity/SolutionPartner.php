@@ -34,7 +34,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 )
             ],
             name: 'get_solution_partners_by_registered_partner',
-            provider: 'App\State\PartnerProvider.Partner'
+            provider: 'App\State\PartnerProvider.Partner',
+//            extraProperties: [
+//                'openapi' => [
+//                    'tags' => ['Partner']
+//                ]
+//            ]
         ),
         new Post(
             denormalizationContext: ['groups' => ['post']],
@@ -48,7 +53,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
         )
     ],
-    normalizationContext: ['groups' => ['read']]
+    normalizationContext: ['groups' => ['read']],
 )]
 class SolutionPartner extends Partner
 {

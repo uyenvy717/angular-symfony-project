@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "generate-api": "ng-openapi-gen --input openapi.yaml --output src/app/api --servicePrefix=Api --modelPrefix=Api"
   },
   "private": true,
   "dependencies": {
