@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { tap } from 'rxjs';
 import { ApiClientService } from '../api/services';
 import { ClientJsonldClientApiRead } from '../api/models';
+import { PartnerType } from './partner.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,9 +24,17 @@ export class ClientService {
       .pipe(tap((response) => this.clients.set(response.member)));
   }
 
+  getClientByPartner(type: PartnerType) {
+    return this.clients().filter(
+      (client) => client.partner?.['@type'] === type
+    );
+  }
+
   setSelectedClient(client: ClientJsonldClientApiRead) {
     this.selectedClient.set(client);
   }
 
   getSelectedClient = computed(() => this.selectedClient());
+
+  getTotalClients = computed(() => this.clients()?.length);
 }

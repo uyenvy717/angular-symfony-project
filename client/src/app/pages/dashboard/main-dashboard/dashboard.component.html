@@ -1,22 +1,35 @@
 <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
 <div class="dashboard grid gap-8 gap-y-10 max-h-full">
-  <div class="statistic grid grid-cols-3">
-    <nz-statistic [nzValue]="(1949101 | number)!" nzTitle="Active Users"></nz-statistic>
-    <nz-statistic [nzValue]="(1949101 | number)!" nzTitle="Active Users"></nz-statistic>
-    <nz-statistic [nzValue]="(1949101 | number)!" nzTitle="Active Users"></nz-statistic>
+  <div class="statistic grid grid-cols-4">
+    <nz-statistic [nzValue]="totalClients()" nzTitle="Total Clients"></nz-statistic>
+    <nz-statistic [nzValue]="avgDealSize()" [nzPrefix]="'$'" nzTitle="Avg. Deal Size"></nz-statistic>
+    <nz-statistic [nzValue]="totalRevenue()" [nzPrefix]="'$'" nzTitle="Total Revenue"></nz-statistic>
+    <nz-statistic [nzValue]="totalRevenue()/6" [nzPrefix]="'$'" nzTitle="Avg. Revenue per Partner"></nz-statistic>
   </div>
-  <div class="list grid grid-cols-2 gap-8">
+  <div class="metric grid grid-cols-2 gap-8">
+    @if (authService.isSuperAdmin() || authService.isGrowthPartner()) {
+      <div class="bg-white p-6 rounded-lg shadow-sm">
+        <h2 class="text-lg font-semibold mb-4">Amount of Partners</h2>
+        <div echarts [options]="partnerPieChart()" class="h-[300px]"></div>
+      </div>
+    }
     <div class="bg-white p-6 rounded-lg shadow-sm">
-      <h2 class="text-lg font-semibold mb-4">Weekly Trend</h2>
+      <h2 class="text-lg font-semibold mb-4">Monthly Revenue</h2>
       <div echarts [options]="lineChartOption" class="h-[300px]"></div>
     </div>
-    <div class="bg-white p-6 rounded-lg shadow-sm">
-      <h2 class="text-lg font-semibold mb-4">Traffic Sources</h2>
-      <div echarts [options]="pieChartOption" class="h-[300px]"></div>
-    </div>
   </div>
-  <div class="metric grid grid-rows-10 gap-y-8">
-    <app-card class="row-span-9" [showTable]="true"></app-card>
-    <button nz-button nzType="primary" nzBlock>Primary</button>
+  <div class="metric2 grid grid-cols-3 gap-8">
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-lg font-semibold mb-4">Monthly New Clients</h2>
+      <div echarts [options]="barChartOption" class="h-[300px]"></div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-lg font-semibold mb-4">Amount of Clients</h2>
+      <div echarts [options]="clientPieChart()" class="h-[300px]"></div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-lg font-semibold mb-4">Total commission</h2>
+      <div echarts [options]="commissionData" class="h-[300px]"></div>
+    </div>
   </div>
 </div>

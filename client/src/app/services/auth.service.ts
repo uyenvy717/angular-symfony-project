@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
+import { PartnerTypeEnum } from './partner.service';
 
 interface LoginResponse {
   token: string;
@@ -16,7 +17,7 @@ interface TokenPayload {
     id: string;
     type: string;
   };
-  email: string;
+  username: string;
   roles?: string[];
 }
 
@@ -26,35 +27,22 @@ interface TokenPayload {
 export class AuthService {
   private apiUrl = environment.authUrl;
   private tokenKey = 'auth_token';
-  private userRoles = signal<string[]>([]);
-  private user = signal<{ userRoles: [], userName: string, email: string, lastLoginDate: string } | null >(null);
-  private tokenInfo!: TokenPayload | null;
+  private tokenInfo = signal<TokenPayload | null>(null);
+  private userRoles = computed(() => this.tokenInfo()?.roles);
+  isSuperAdmin = computed(() =>  this.userRoles()?.includes('ROLE_SUPER_ADMIN'))
+  isGrowthPartner = computed(() =>  this.tokenInfo()?.partner?.type?.includes(PartnerTypeEnum.GROWTH));
 
   constructor(private http: HttpClient, private router: Router) {
     // Initialize roles from token if it exists
-    this.initializeRoles();
+    this.initializeAccount();
   }
 
-  private initializeRoles() {
-    this.tokenInfo = this.getDecodedToken();
-    const isExpired = this.isTokenExpired(this.tokenInfo);
+  private initializeAccount() {
+    this.tokenInfo.set(this.getDecodedToken());
+    const isExpired = this.isTokenExpired(this.tokenInfo());
     if (isExpired) {
       this.logout();
-    } else if (this.tokenInfo && this.tokenInfo.roles) {
-      this.userRoles.set(this.tokenInfo.roles);
     }
-  }
-
-  isSuperAdmin = computed(() =>  this.userRoles().includes('ROLE_SUPER_ADMIN'))
-
-  // Check if user has a specific role
-  hasRole(role: string): boolean {
-    return this.userRoles().includes(role);
-  }
-
-  // Check if user's partner type is GrowthPartner
-  isGrowthPartner(): boolean {
-    return !!this.tokenInfo?.partner?.type?.includes('GrowthPartner');
   }
 
   // Decode and get token payload
@@ -90,26 +78,18 @@ export class AuthService {
       .post<LoginResponse>(`${this.apiUrl}`, credentials)
       .pipe(
         tap((response) => {
-          console.log('User info:', response);
-          console.log('Token received:', response.token ? 'Yes' : 'No');
+          // The response is token
           // Store the token in localStorage
           localStorage.setItem(this.tokenKey, response.token);
-          // Initialize roles from token
-          this.initializeRoles();
-          // Log decoded token information
-          this.tokenInfo = this.getDecodedToken();
-          if (this.tokenInfo) {
-            console.log('Token expiration:', new Date(this.tokenInfo.exp * 1000));
-            console.log('User roles:', this.userRoles);
-          }
+          // Initialize account from token
+          this.initializeAccount();
         })
       );
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
-    this.userRoles.set([]);
-    this.tokenInfo = null;
+    this.tokenInfo.set(null);
     this.router.navigate(['/login']);
   }
 
@@ -120,4 +100,6 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
+
+  getName = computed(() => this.tokenInfo()?.name);
 } 

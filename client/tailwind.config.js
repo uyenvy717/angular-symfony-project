@@ -141,8 +141,9 @@ module.exports = {
                     'content nav-panel'
                 ],
                 'main-dashboard': [
-                    'statistic statistic statistic',
-                    'list metric metric'
+                    'statistic statistic statistic statistic',
+                    'metric metric metric metric',
+                    'metric2 metric2 metric2 metric2'
                 ],
                 'inside-dashboard': [
                     'statistic statistic statistic',

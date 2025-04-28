@@ -75,7 +75,7 @@ export class PartnerService {
     );
   }
 
-  fetchByType(type: PartnerType, id: string) {
+  fetchByType(type: PartnerType) {
     let request$: Observable<{ member: Array<ExtendedPartnerDto> }>;
     if (type === PartnerTypeEnum.SOLUTION) {
       request$ = this.service.apiSolutionPartnersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;

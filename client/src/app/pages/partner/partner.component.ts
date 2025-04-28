@@ -142,20 +142,18 @@ export class PartnerComponent implements OnInit {
           },
         });
     } else {
-      this.partnerService
-        .fetchByType(this.currentTab(), this.partnerId())
-        .subscribe({
-          next: (partners) => {
-            this.partners.set(partners.member);
-            this.loading.set(false);
-          },
-          error: (err) => {
-            console.error('Failed to load partners:', err);
-            this.loading.set(false);
-            this.error.set('Failed to load partners');
-            this.message.error('Failed to load partners');
-          },
-        });
+      this.partnerService.fetchByType(this.currentTab()).subscribe({
+        next: (partners) => {
+          this.partners.set(partners.member);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load partners:', err);
+          this.loading.set(false);
+          this.error.set('Failed to load partners');
+          this.message.error('Failed to load partners');
+        },
+      });
     }
   }
 

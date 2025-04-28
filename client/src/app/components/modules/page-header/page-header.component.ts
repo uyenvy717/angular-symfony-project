@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 
@@ -14,10 +20,13 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PageHeaderComponent {
-  constructor(
-    private authService: AuthService,
-  ) {}
+export class PageHeaderComponent implements OnInit {
+  private authService = inject(AuthService);
+  accountName = signal<string | undefined>('');
+
+  ngOnInit() {
+    this.accountName.set(this.authService.getName());
+  }
 
   logout() {
     this.authService.logout();
