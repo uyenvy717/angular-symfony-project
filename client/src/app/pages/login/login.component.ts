@@ -1,10 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
-import { FormComponent } from '../../components/ui/form/form.component';
+import {
+  FormComponent,
+  FormField,
+} from '../../components/ui/form/form.component';
 
 @Component({
   selector: 'app-login',
@@ -16,13 +19,34 @@ import { FormComponent } from '../../components/ui/form/form.component';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private message: NzMessageService
-  ) {
+  formFields: FormField[] = [
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      icon: 'user',
+      required: true,
+      errorMessages: {
+        required: 'Please input your email!',
+        email: 'Please input a valid email!',
+      },
+    },
+    {
+      name: 'password',
+      type: 'password',
+      label: 'Password',
+      icon: 'lock',
+      required: true,
+      errorMessages: {
+        required: 'Please input your password!',
+      },
+    },
+  ];
+
+  constructor(private fb: FormBuilder, private message: NzMessageService) {
     this.loginForm = this.fb.group({
       email: [null, [Validators.required, Validators.email]],
       password: [null, [Validators.required]],

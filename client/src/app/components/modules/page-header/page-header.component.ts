@@ -7,10 +7,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
+import { ButtonComponent } from '../../ui/button/button.component';
 
 @Component({
   selector: 'app-page-header',
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './page-header.component.html',
   styles: `
     :host {

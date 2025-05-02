@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -68,6 +68,7 @@ export class PartnerComponent implements OnInit {
   currentTab = signal<PartnerType>(PartnerTypeEnum.SOLUTION);
   private partnerService = inject(PartnerService);
   private authService = inject(AuthService);
+  router = inject(Router);
   adminViewMode = computed(
     () => this.partnerId() === '' && this.authService.isSuperAdmin()
   );
@@ -78,11 +79,7 @@ export class PartnerComponent implements OnInit {
     { title: 'Affiliate Partner', isTabVisible: true },
   ]);
 
-  constructor(
-    private message: NzMessageService,
-    public router: Router,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private message: NzMessageService) {}
 
   ngOnInit(): void {
     this.currentTab.set(
@@ -157,8 +154,7 @@ export class PartnerComponent implements OnInit {
     }
   }
 
-  onRowClick(partner: ExtendedPartnerDto): void {
-    this.partnerService.setSelectedPartner(partner);
-    this.router.navigate([partner.id], { relativeTo: this.route });
+  onRowClick(partner: ExtendedPartnerDto) {
+    this.router.navigate(['/partners', partner.id]);
   }
 }

@@ -18,26 +18,24 @@ import { AuthService } from '../../../services/auth.service';
 })
 export class NavPanelComponent {
   buttonLabels: string[] = [];
-  
-  constructor(
-    private router: Router,
-    private authService: AuthService
-  ) {
+
+  constructor(private router: Router, private authService: AuthService) {
     // Initialize buttons based on user role
     this.initializeButtons();
   }
 
   private initializeButtons(): void {
     const isGrowthPartner = this.authService.isGrowthPartner();
-    
+
+    // TODO: use enums
     // Always show Dashboard
     this.buttonLabels = ['Dashboard'];
-    
+
     // Add Partner only for GrowthPartner users
     if (isGrowthPartner) {
       this.buttonLabels.push('Partner');
     }
-    
+
     // Add other menu items
     this.buttonLabels.push('Client', 'User');
   }

@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  Input,
+  input,
   OnInit,
   signal,
 } from '@angular/core';
@@ -12,7 +12,20 @@ import { ClientService } from '../../services/client.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { ClientJsonldClientApiRead } from '../../api/models';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { ButtonComponent } from '../../components/ui/button/button.component';
+import {
+  FormComponent,
+  FormField,
+} from '../../components/ui/form/form.component';
 
 interface Client {
   '@id': string;
@@ -33,28 +46,40 @@ interface Client {
 
 @Component({
   selector: 'app-client',
-  imports: [CommonModule, TableComponent, NzSpinModule],
+  imports: [
+    CommonModule,
+    TableComponent,
+    NzSpinModule,
+    ReactiveFormsModule,
+    NzModalModule,
+    NzButtonModule,
+    ButtonComponent,
+    FormComponent,
+  ],
   standalone: true,
   templateUrl: './client.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [NzMessageService]
+  providers: [NzMessageService],
 })
 export class ClientComponent implements OnInit {
-  @Input() partnerId?: string;
+  partnerId = input<string>('');
 
   columns = [
     {
       title: 'Name',
-      key: 'name'
+      key: 'name',
     },
     {
       title: 'Email',
-      key: 'email'
+      key: 'email',
     },
     {
       title: 'Start Date',
       key: 'startDate',
-      render: (data: ClientJsonldClientApiRead) => data.startDate ? new Date(data.startDate).toLocaleDateString() : 'No data'
+      render: (data: ClientJsonldClientApiRead) =>
+        data.startDate
+          ? new Date(data.startDate).toLocaleDateString()
+          : 'No data',
     },
     {
       title: 'Registered Partner',
@@ -64,7 +89,7 @@ export class ClientComponent implements OnInit {
           return '';
         }
         return data.partner?.name || '';
-      }
+      },
     },
     {
       title: 'Registered Growth Partner',
@@ -74,19 +99,69 @@ export class ClientComponent implements OnInit {
           return data.partner.name || '';
         }
         return data.partner?.registeredPartnerName || '';
-      }
-    }
+      },
+    },
   ];
   clients = signal<ClientJsonldClientApiRead[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+  router = inject(Router);
   private clientService = inject(ClientService);
 
-  constructor(
-    private message: NzMessageService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  isModalVisible = signal<boolean>(false);
+  createForm: FormGroup;
+  submitting = signal<boolean>(false);
+  private fb = inject(FormBuilder);
+
+  formFields: FormField[] = [
+    {
+      name: 'name',
+      type: 'text',
+      label: 'Name',
+      required: true,
+      errorMessages: {
+        required: 'Name is required'
+      }
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      required: true,
+      errorMessages: {
+        required: 'Email is required',
+        email: 'Invalid email format'
+      }
+    },
+    {
+      name: 'startDate',
+      type: 'date',
+      label: 'Start Date',
+      required: false
+    },
+    {
+      name: 'partner',
+      type: 'text',
+      label: 'Partner (ID or URI)',
+      required: false
+    },
+    {
+      name: 'isActive',
+      type: 'checkbox',
+      label: 'Active',
+      required: false
+    }
+  ];
+
+  constructor(private message: NzMessageService) {
+    this.createForm = this.fb.group({
+      name: [null, [Validators.required]],
+      email: [null, [Validators.required, Validators.email]],
+      startDate: [null],
+      partner: [null],
+      isActive: [true],
+    });
+  }
 
   ngOnInit(): void {
     this.loadClients();
@@ -96,8 +171,8 @@ export class ClientComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    if (this.partnerId) {
-      this.clientService.fetchByRegisteredPartner(this.partnerId).subscribe({
+    if (this.partnerId()) {
+      this.clientService.fetchByRegisteredPartner(this.partnerId()).subscribe({
         next: (clients) => {
           this.clients.set(clients.member);
           this.loading.set(false);
@@ -107,7 +182,7 @@ export class ClientComponent implements OnInit {
           this.loading.set(false);
           this.error.set('Failed to load clients');
           this.message.error('Failed to load clients');
-        }
+        },
       });
     } else {
       this.clientService.fetchClients().subscribe({
@@ -120,13 +195,12 @@ export class ClientComponent implements OnInit {
           this.loading.set(false);
           this.error.set('Failed to load clients');
           this.message.error('Failed to load clients');
-        }
+        },
       });
     }
   }
 
   onRowClick(client: ClientJsonldClientApiRead) {
-    this.clientService.setSelectedClient(client);
     if (!client['@id']) {
       this.message.error('Invalid client ID');
       return;

@@ -93,8 +93,6 @@ export class UserComponent implements OnInit {
   }
 
   onRowClick(user: UserApiJsonld) {
-    this.userService.setSelectedUser(user);
-    // this.router.navigate([user.id], { relativeTo: this.route });
     this.router.navigate(['/users', user.id]);
   }
 }

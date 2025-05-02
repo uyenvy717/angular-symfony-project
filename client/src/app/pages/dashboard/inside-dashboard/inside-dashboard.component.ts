@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   OnInit,
   signal,
 } from '@angular/core';
@@ -47,11 +48,9 @@ export class InsideDashboardComponent implements OnInit {
   );
   clientData = signal<ClientJsonldClientApiRead | null>(null);
   userData = signal<UserApiJsonld | null>(null);
+  activatedRoute = inject(ActivatedRoute);
 
-  constructor(
-    private message: NzMessageService,
-    private activatedRoute: ActivatedRoute
-  ) {}
+  constructor(private message: NzMessageService) {}
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ partner, client, user }) => {

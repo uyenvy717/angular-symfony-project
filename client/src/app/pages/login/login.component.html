@@ -1,6 +1,9 @@
 <app-form
+  class="login-form"
   [formGroup]="loginForm"
   [onSubmit]="submitForm"
+  [fields]="formFields"
+  [isLoginForm]="true"
   title="Login"
   submitButtonText="Log in"
 ></app-form>

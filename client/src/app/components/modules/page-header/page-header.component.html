@@ -6,11 +6,9 @@
     <div class="header-content flex items-center">
       <div class="flex items-baseline gap-4">
         <p class="text-lg">{{ accountName() }}</p>
-        <button 
-          (click)="logout()" 
-          class="px-3 py-1.5 bg-magenta text-white rounded hover:bg-magenta-dark transition-colors">
-          Logout
-        </button>
+        <app-button
+          [label]="'Logout'" (click)="logout()" [buttonType]="'btn'">
+        </app-button>
       </div>
     </div>
   </div>

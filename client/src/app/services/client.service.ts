@@ -4,18 +4,37 @@ import { ApiClientService } from '../api/services';
 import { ClientJsonldClientApiRead } from '../api/models';
 import { PartnerType } from './partner.service';
 
+interface ClientPostData {
+  name?: string;
+  email?: string;
+  startDate?: string;
+  partner?: string;
+  isActive?: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ClientService {
   private readonly service = inject(ApiClientService);
   private clients = signal<ClientJsonldClientApiRead[]>([]);
-  selectedClient = signal<ClientJsonldClientApiRead | null>(null);
 
   fetchClients() {
     return this.service
       .apiClientsGetCollection()
       .pipe(tap((response) => this.clients.set(response.member)));
+  }
+
+  fetchClient(id: string) {
+    return this.service.apiClientsIdGet({ id : id })
+      .pipe(
+        tap(client => {
+          this.clients.update(clients => {
+            clients.push(client);
+            return clients;
+          });
+        })
+      )
   }
 
   fetchByRegisteredPartner(id: string) {
@@ -30,11 +49,18 @@ export class ClientService {
     );
   }
 
-  setSelectedClient(client: ClientJsonldClientApiRead) {
-    this.selectedClient.set(client);
+  getClientById(id: string) {
+    return this.clients().find((client) => {
+      if (!client['@id']) throw new Error('Invalid client ID');
+      return client['@id'].split('/').pop() === id
+    });
   }
 
-  getSelectedClient = computed(() => this.selectedClient());
-
   getTotalClients = computed(() => this.clients()?.length);
+
+  createClient(client: ClientPostData) {
+    return this.service.apiClientsPost({
+      body: client
+    });
+  }
 }

@@ -1,4 +1,10 @@
-<h1 class="text-2xl font-bold mb-4">Partner Dashboard</h1>
+@if (clientData()) {
+  <h1 class="text-2xl font-bold mb-4">Client Dashboard</h1>
+} @else if (userData()) {
+  <h1 class="text-2xl font-bold mb-4">User Dashboard</h1>
+} @else {
+  <h1 class="text-2xl font-bold mb-4">Partner Dashboard</h1>
+}
 <div class="inside-dashboard grid gap-8 gap-y-10 max-h-full">
   <div class="statistic">
     <app-card [showContent]="true" [partnerData]="partnerData()" [clientData]="clientData()" [userData]="userData()"></app-card>

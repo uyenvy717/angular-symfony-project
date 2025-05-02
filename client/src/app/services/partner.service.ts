@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import {
   ApiAffiliatePartnerService,
@@ -49,12 +49,24 @@ export class PartnerService {
   private readonly sprService = inject(ApiSolutionProviderService);
   private readonly aService = inject(ApiAffiliatePartnerService);
   private partners = signal<ExtendedPartnerDto[]>([]);
-  selectedPartner = signal<ExtendedPartnerDto | null>(null);
 
   fetchPartners() {
     return this.service.apiPartnersGetCollection().pipe(
       tap(response => this.partners.set(response.member as ExtendedPartnerDto[]))
     );
+  }
+
+  fetchPartner(id: ExtendedPartnerDto['id']) {
+    if (!id) throw new Error('Partner ID is required');
+    return this.service.apiPartnersIdGet({ id: id })
+      .pipe(
+        tap(parent => {
+          this.partners.update(partners => {
+            partners.push(parent);
+            return partners;
+          });
+        })
+      )
   }
 
   fetchByRegisteredPartner(type: PartnerType, id: string) {
@@ -97,9 +109,7 @@ export class PartnerService {
     return this.partners().filter((partner) => partner['@type'] === type);
   }
 
-  setSelectedPartner(partner: ExtendedPartnerDto) {
-    this.selectedPartner.set(partner);
+  getPartnerById(id: ExtendedPartnerDto['id']) {
+    return this.partners().find((partner) => partner.id === id);
   }
-
-  getSelectedPartner = computed(() => this.selectedPartner());
 } 

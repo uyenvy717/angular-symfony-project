@@ -1,4 +1,9 @@
-import { RouterModule, Routes } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  RouterModule,
+  RouterStateSnapshot,
+  Routes,
+} from '@angular/router';
 import { inject, NgModule } from '@angular/core';
 import { DashboardComponent } from './dashboard/main-dashboard/dashboard.component';
 import { PartnerComponent } from './partner/partner.component';
@@ -25,14 +30,18 @@ const routes: Routes = [
         path: ':id',
         component: InsideDashboardComponent,
         resolve: {
-          partner: () => inject(PartnerService).getSelectedPartner(),
-        },
-      },
-      {
-        path: ':id/:subId',
-        component: InsideDashboardComponent,
-        resolve: {
-          partner: () => inject(PartnerService).getSelectedPartner(),
+          partner: (
+            route: ActivatedRouteSnapshot,
+            state: RouterStateSnapshot
+          ) => {
+            const service = inject(PartnerService);
+            const id = route.params['id'];
+            const partner = service.getPartnerById(id);
+            if (partner) {
+              return partner;
+            }
+            return service.fetchPartner(id);
+          },
         },
       },
     ],
@@ -48,7 +57,18 @@ const routes: Routes = [
         path: ':id',
         component: InsideDashboardComponent,
         resolve: {
-          client: () => inject(ClientService).getSelectedClient(),
+          client: (
+            route: ActivatedRouteSnapshot,
+            state: RouterStateSnapshot
+          ) => {
+            const service = inject(ClientService);
+            const id = route.params['id'];
+            const client = service.getClientById(id);
+            if (client) {
+              return client;
+            }
+            return service.fetchClient(id);
+          },
         },
       },
     ],
@@ -64,7 +84,15 @@ const routes: Routes = [
         path: ':id',
         component: InsideDashboardComponent,
         resolve: {
-          user: () => inject(UserService).getSelectedUser(),
+          user: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+            const service = inject(UserService);
+            const id = route.params['id'];
+            const user = service.getUserById(id);
+            if (user) {
+              return user;
+            }
+            return service.fetchUser(id);
+          },
         },
       },
     ],
