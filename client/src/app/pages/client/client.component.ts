@@ -212,4 +212,47 @@ export class ClientComponent implements OnInit {
     }
     this.router.navigate(['/clients', id]);
   }
+
+  openCreateModal(): void {
+    this.isModalVisible.set(true);
+  }
+
+  closeCreateModal(): void {
+    this.isModalVisible.set(false);
+    this.createForm.reset({ isActive: true });
+  }
+
+  // handleModalVisibleChange(visible: boolean): void {
+  //   if (!visible) {
+  //     this.closeCreateModal();
+  //   } else {
+  //     this.isModalVisible.set(true);
+  //   }
+  // }
+
+  submitCreateForm = (): void => {
+    if (this.createForm.invalid) return;
+    this.submitting.set(true);
+
+    const formData = this.createForm.value;
+    if (formData.startDate) {
+      formData.startDate = new Date(formData.startDate).toISOString().split('T')[0];
+    }
+
+    this.clientService.createClient(formData).subscribe({
+      next: () => {
+        this.message.success('Client created successfully');
+        this.closeCreateModal();
+        this.loadClients();
+        this.submitting.set(false);
+        this.isModalVisible.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to create client:', err);
+        this.message.error('Failed to create client');
+        this.submitting.set(false);
+        this.isModalVisible.set(false);
+      },
+    });
+  };
 }

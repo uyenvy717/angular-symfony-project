@@ -1,38 +1,43 @@
-<div class="form-container">
-  <div class="form-box">
-    <h1 class="text-3xl text-center mb-8">{{ title }}</h1>
-    <form nz-form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-      <nz-form-item>
-        <nz-form-control [nzErrorTip]="emailError">
-          <nz-input-group nzPrefixIcon="user">
-            <input type="email" nz-input formControlName="email" placeholder="Email" />
-          </nz-input-group>
-        </nz-form-control>
-        <ng-template #emailError let-control>
-          @if (control.hasError('required')) {
-            <ng-container>Please input your email!</ng-container>
-          } @else if (control.hasError('email')) {
-            <ng-container>Please input a valid email!</ng-container>
-          }
-        </ng-template>
-      </nz-form-item>
+<div [class]="isLoginForm ? 'login-form-container' : ''">
+  <div [class]="isLoginForm ? 'login-form-box' : 'modal-form-box'">
+    @if (title(); as formTitle) {
+      <h1 class="text-3xl text-center mb-8">{{ formTitle }}</h1>
+    }
+    
+    <form nz-form [formGroup]="formGroup" (ngSubmit)="handleSubmit()">
+      @for (field of fields; track field.name) {
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="errorTpl">
+            @if (field.type === 'checkbox') {
+              <label nz-checkbox [formControlName]="field.name">
+                {{ field.label }}
+              </label>
+            } @else {
+              <nz-input-group [nzPrefixIcon]="field.icon || ''">
+                <input 
+                  nz-input 
+                  [type]="field.type"
+                  [formControlName]="field.name"
+                  [placeholder]="field.placeholder || field.label"
+                />
+              </nz-input-group>
+            }
+          </nz-form-control>
+          <ng-template #errorTpl>
+            {{ getErrorMessage(formGroup.get(field.name), field) }}
+          </ng-template>
+        </nz-form-item>
+      }
 
       <nz-form-item>
-        <nz-form-control [nzErrorTip]="passwordError">
-          <nz-input-group nzPrefixIcon="lock">
-            <input type="password" nz-input formControlName="password" placeholder="Password" />
-          </nz-input-group>
-        </nz-form-control>
-        <ng-template #passwordError let-control>
-          @if (control.hasError('required')) {
-            <ng-container>Please input your password!</ng-container>
-          }
-        </ng-template>
-      </nz-form-item>
-
-      <nz-form-item>
-        <button nz-button class="form-button" [nzType]="'primary'" [disabled]="!formGroup.valid">
-          {{ submitButtonText }}
+        <button 
+          nz-button 
+          nzType="primary" 
+          type="submit"
+          class="form-button"
+          [disabled]="!formGroup.valid"
+        >
+          {{ submitButtonText() }}
         </button>
       </nz-form-item>
     </form>

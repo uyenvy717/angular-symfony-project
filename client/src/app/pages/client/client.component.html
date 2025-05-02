@@ -1,4 +1,7 @@
-<h1 class="text-2xl font-bold mb-4">Client</h1>
+<div class="flex flex-row justify-between">
+  <h1 class="text-2xl font-bold mb-4">Client</h1>
+  <app-button [buttonType]="'add-btn'" [label]="'+ Create Client'" (click)="openCreateModal()"></app-button>
+</div>
 <div class="client-container">
   @if (error(); as error) {
     <div class="error-message">
@@ -12,3 +15,20 @@
     <app-table [data]="clients()" [columns]="columns" (rowClick)="onRowClick($event)"></app-table>
   }
 </div>
+
+<nz-modal 
+  [nzVisible]="isModalVisible()"
+  nzTitle="Create a new client"
+  [nzFooter]="null"
+  (nzOnCancel)="closeCreateModal()"
+  [nzWidth]="520"
+>
+  <ng-container *nzModalContent>
+    <app-form
+      [formGroup]="createForm"
+      [onSubmit]="submitCreateForm"
+      [fields]="formFields"
+      submitButtonText="Create"
+    ></app-form>
+  </ng-container>
+</nz-modal>

@@ -1,7 +1,21 @@
-.btn {
+.nav-panel-btn {
   @apply flex m-1 w-5/6 justify-start justify-self-center bg-transparent py-2 pl-4 rounded transition duration-300 text-lg;
 
   &:hover {
-    @apply bg-secondary-dark text-primary border-transparent
+    @apply bg-secondary-dark text-primary border-transparent;
+  }
+}
+
+.btn {
+  @apply px-3 py-1.5 bg-magenta text-white rounded;
+  &:hover {
+    @apply bg-magenta-dark transition-colors;
+  }
+}
+
+.add-btn {
+  @apply px-3 py-1.5 bg-gold text-white rounded;
+  &:hover {
+    @apply bg-gold-dark transition-colors;
   }
 }
