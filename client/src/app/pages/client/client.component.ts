@@ -27,6 +27,8 @@ import {
   FormField,
 } from '../../components/ui/form/form.component';
 
+type ModalMode = 'create' | 'edit';
+
 interface Client {
   '@id': string;
   '@type': string;
@@ -109,8 +111,11 @@ export class ClientComponent implements OnInit {
   private clientService = inject(ClientService);
 
   isModalVisible = signal<boolean>(false);
+  modalMode = signal<ModalMode>('create');
+  selectedClient = signal<ClientJsonldClientApiRead | null>(null);
+
   createForm: FormGroup;
-  submitting = signal<boolean>(false);
+  // submitting = signal<boolean>(false);
   private fb = inject(FormBuilder);
 
   formFields: FormField[] = [
@@ -143,7 +148,7 @@ export class ClientComponent implements OnInit {
       name: 'partner',
       type: 'text',
       label: 'Partner (ID or URI)',
-      required: false
+      required: true
     },
     {
       name: 'isActive',
@@ -158,7 +163,7 @@ export class ClientComponent implements OnInit {
       name: [null, [Validators.required]],
       email: [null, [Validators.required, Validators.email]],
       startDate: [null],
-      partner: [null],
+      partner: [null, [Validators.required]],
       isActive: [true],
     });
   }
@@ -214,45 +219,82 @@ export class ClientComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    this.modalMode.set('create');
+    this.selectedClient.set(null);
+    this.createForm.reset({ isActive: true });
     this.isModalVisible.set(true);
   }
 
-  closeCreateModal(): void {
-    this.isModalVisible.set(false);
-    this.createForm.reset({ isActive: true });
+  openEditModal(client: ClientJsonldClientApiRead): void {
+    this.modalMode.set('edit');
+    this.selectedClient.set(client);
+    let startDate = client.startDate;
+    if (startDate) {
+      startDate = new Date(startDate).toISOString().split('T')[0];
+    }
+
+    this.createForm.patchValue({
+      name: client.name,
+      email: client.email,
+      startDate: startDate,
+      partner: client.partner?.['@id'],
+      isActive: client.active,
+    });
+    this.isModalVisible.set(true);
   }
 
-  // handleModalVisibleChange(visible: boolean): void {
-  //   if (!visible) {
-  //     this.closeCreateModal();
-  //   } else {
-  //     this.isModalVisible.set(true);
-  //   }
-  // }
+  closeModal(): void {
+    this.isModalVisible.set(false);
+    this.createForm.reset({ isActive: true });
+    this.selectedClient.set(null);
+  }
 
-  submitCreateForm = (): void => {
+  submitForm = (): void => {
     if (this.createForm.invalid) return;
-    this.submitting.set(true);
 
     const formData = this.createForm.value;
     if (formData.startDate) {
       formData.startDate = new Date(formData.startDate).toISOString().split('T')[0];
     }
 
-    this.clientService.createClient(formData).subscribe({
-      next: () => {
-        this.message.success('Client created successfully');
-        this.closeCreateModal();
-        this.loadClients();
-        this.submitting.set(false);
-        this.isModalVisible.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to create client:', err);
-        this.message.error('Failed to create client');
-        this.submitting.set(false);
-        this.isModalVisible.set(false);
-      },
-    });
+    this.loading.set(true);
+    
+    if (this.modalMode() === 'create') {
+      this.clientService.createClient(formData).subscribe({
+        next: () => {
+          this.message.success('Client created successfully');
+          this.loadClients();
+          this.closeModal();
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to create client:', err);
+          this.message.error('Failed to create client');
+          this.loading.set(false);
+        },
+      });
+    } else {
+      // Edit mode
+      const clientId = this.selectedClient()?.['@id'];
+      if (!clientId) {
+        this.message.error('Invalid client ID');
+        return;
+      }
+
+      const id = clientId.split('/').pop() || '';
+      this.clientService.updateClient(id, formData).subscribe({
+        next: () => {
+          this.message.success('Client updated successfully');
+          this.loadClients();
+          this.closeModal();
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to update client:', err);
+          this.message.error('Failed to update client');
+          this.loading.set(false);
+        },
+      });
+    }
   };
 }

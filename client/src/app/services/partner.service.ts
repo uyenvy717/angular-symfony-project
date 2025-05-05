@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { forkJoin, Observable, tap } from 'rxjs';
 import {
   ApiAffiliatePartnerService,
   ApiPartnerService,
@@ -13,6 +13,7 @@ import {
   SolutionPartnerApiJsonldRead,
   SolutionProviderApiJsonldRead,
 } from '../api/models';
+import { map } from 'rxjs/operators';
 
 export type PartnerType =
   | 'GrowthPartner'
@@ -50,12 +51,14 @@ export class PartnerService {
   private readonly aService = inject(ApiAffiliatePartnerService);
   private partners = signal<ExtendedPartnerDto[]>([]);
 
+  // For SUPER ADMIN
   fetchPartners() {
     return this.service.apiPartnersGetCollection().pipe(
       tap(response => this.partners.set(response.member as ExtendedPartnerDto[]))
     );
   }
 
+  // For SUPER ADMIN
   fetchPartner(id: ExtendedPartnerDto['id']) {
     if (!id) throw new Error('Partner ID is required');
     return this.service.apiPartnersIdGet({ id: id })

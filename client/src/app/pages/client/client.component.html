@@ -1,6 +1,6 @@
 <div class="flex flex-row justify-between">
   <h1 class="text-2xl font-bold mb-4">Client</h1>
-  <app-button [buttonType]="'add-btn'" [label]="'+ Create Client'" (click)="openCreateModal()"></app-button>
+  <app-button [color]="'gold'" [label]="'+ Create Client'" (click)="openCreateModal()"></app-button>
 </div>
 <div class="client-container">
   @if (error(); as error) {
@@ -12,23 +12,28 @@
       <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
     </div>
   } @else {
-    <app-table [data]="clients()" [columns]="columns" (rowClick)="onRowClick($event)"></app-table>
+    <app-table 
+      [data]="clients()" 
+      [columns]="columns"
+      (onEdit)="openEditModal($event)"
+      (rowClick)="onRowClick($event)">
+    </app-table>
   }
 </div>
 
 <nz-modal 
   [nzVisible]="isModalVisible()"
-  nzTitle="Create a new client"
+  [nzTitle]="modalMode() === 'create' ? 'Create a new client' : 'Edit the client'"
   [nzFooter]="null"
-  (nzOnCancel)="closeCreateModal()"
+  (nzOnCancel)="closeModal()"
   [nzWidth]="520"
 >
   <ng-container *nzModalContent>
     <app-form
       [formGroup]="createForm"
-      [onSubmit]="submitCreateForm"
+      [onSubmit]="submitForm"
       [fields]="formFields"
-      submitButtonText="Create"
+      [submitButtonText]="modalMode() === 'create' ? 'Create' : 'Save'"
     ></app-form>
   </ng-container>
 </nz-modal>

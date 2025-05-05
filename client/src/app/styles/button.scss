@@ -6,16 +6,27 @@
   }
 }
 
-.btn {
-  @apply px-3 py-1.5 bg-magenta text-white rounded;
+.base-btn {
+  @apply px-3 py-1.5 text-white rounded transition-colors flex items-center gap-2;
+}
+
+.magenta {
+  @apply bg-magenta;
   &:hover {
-    @apply bg-magenta-dark transition-colors;
+    @apply bg-magenta-dark;
   }
 }
 
-.add-btn {
-  @apply px-3 py-1.5 bg-gold text-white rounded;
+.gold {
+  @apply bg-gold;
   &:hover {
-    @apply bg-gold-dark transition-colors;
+    @apply bg-gold-dark;
+  }
+}
+
+.secondary {
+  @apply bg-secondary;
+  &:hover {
+    @apply bg-secondary-dark;
   }
 }

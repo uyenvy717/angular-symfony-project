@@ -1,7 +1,7 @@
-<nz-table #basicTable [nzData]="data" [nzNoResult]="'No data available'">
+<nz-table #basicTable [nzData]="data()" [nzNoResult]="'No data available'">
   <thead>
     <tr>
-      @for (column of columns; track column.key) {
+      @for (column of columns(); track column.key) {
         <th>{{ column.title }}</th>
       }
       <th>Action</th>
@@ -10,7 +10,7 @@
   <tbody>
     @for (data of basicTable.data; track data) {
       <tr (click)="rowClick.emit(data)" style="cursor: pointer">
-        @for (column of columns; track column.key) {
+        @for (column of columns(); track column.key) {
           <td>
             @if (column.render) {
               @if (column.title === 'Account Status' || column.key === 'active') {
@@ -24,9 +24,20 @@
           </td>
         }
         <td>
-          <a>Action 一 {{ data.name }}</a>
-          <nz-divider nzType="vertical"></nz-divider>
-          <a>Delete</a>
+          <div class="flex gap-2">
+            <app-button 
+              [color]="'gold'"
+              [icon]="'edit'"
+              (click)="$event.stopPropagation(); onEdit.emit(data)">
+            </app-button>
+            @if (showToggleButton()) {
+              <app-button 
+                [color]="data.active ? 'gold' : 'secondary'"
+                [icon]="data.active ? 'pause-circle' : 'play-circle'"
+                (click)="$event.stopPropagation(); onToggleActive.emit(data)">
+              </app-button>
+            }
+          </div>
         </td>
       </tr>
     }

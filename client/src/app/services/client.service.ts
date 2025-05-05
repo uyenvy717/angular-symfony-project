@@ -63,4 +63,11 @@ export class ClientService {
       body: client
     });
   }
+
+  updateClient(id: string, client: ClientJsonldClientApiRead) {
+    return this.service.apiClientsIdPatch({
+      id: id,
+      body: client,
+    });
+  }
 }
