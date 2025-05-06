@@ -232,17 +232,32 @@ export class ClientComponent implements OnInit {
           this.partnerOptions.set(options);
         }
       });
-    } else if (this.authService.isGrowthPartner()) {
-      this.partnerService.fetchAllTypes().subscribe({
-        next: (partners) => {
-          console.log(partners);
-        }
-      })
     } else {
-      console.log(this.authService.getName());
-      console.log(this.authService.getId());
+      const options: PartnerRelated[] = [];
+
+      this.partnerService.fetchPartner(this.authService.getPartnerId()).subscribe({
+        next: (response) => {
+          options.push({
+            label: response?.name || '',
+            value: response['@id'] || ''
+          });
+        }
+      });
+
+      if (this.authService.isGrowthPartner()) {
+        this.partnerService.fetchAllTypes().subscribe({
+          next: (response) => {
+            options.push(
+              ...response.map((partner: any) => ({
+                label: partner.name,
+                value: partner['@id']
+              }))
+            );
+          }
+        });
+      }
+      this.partnerOptions.set(options);
     }
-    return null;
   }
 
   onRowClick(client: ClientJsonldClientApiRead) {

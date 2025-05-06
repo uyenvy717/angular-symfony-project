@@ -51,14 +51,14 @@ export class PartnerService {
   private readonly aService = inject(ApiAffiliatePartnerService);
   private partners = signal<ExtendedPartnerDto[]>([]);
 
-  // For SUPER ADMIN
+  // For SUPER_ADMIN
   fetchPartners() {
     return this.service.apiPartnersGetCollection().pipe(
       tap(response => this.partners.set(response.member as ExtendedPartnerDto[]))
     );
   }
 
-  // For SUPER ADMIN
+  // For SUPER_ADMIN and the partner's users
   fetchPartner(id: ExtendedPartnerDto['id']) {
     if (!id) throw new Error('Partner ID is required');
     return this.service.apiPartnersIdGet({ id: id })
