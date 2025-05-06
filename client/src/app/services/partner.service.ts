@@ -108,6 +108,23 @@ export class PartnerService {
     );
   }
 
+  fetchAllTypes() {
+    const solution$ = this.service.apiSolutionPartnersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;
+    const provider$ = this.service.apiSolutionProvidersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;
+    const affiliate$ = this.service.apiAffiliatePartnersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;
+
+    return forkJoin([solution$, provider$, affiliate$]).pipe(
+      map(([solution, provider, affiliate]) => [
+        ...solution.member,
+        ...provider.member,
+        ...affiliate.member
+      ]),
+      tap(allPartners => {
+        this.partners.set(allPartners);
+      })
+    );
+  }
+
   getPartnerByType(type: PartnerType) {
     return this.partners().filter((partner) => partner['@type'] === type);
   }

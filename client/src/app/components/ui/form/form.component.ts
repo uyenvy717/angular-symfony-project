@@ -5,15 +5,17 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 export interface FormField {
   name: string;
-  type: 'text' | 'email' | 'password' | 'date' | 'checkbox';
+  type: 'text' | 'email' | 'password' | 'date' | 'checkbox' | 'select';
   label: string;
   placeholder?: string;
   icon?: string;
   required?: boolean;
   errorMessages?: { [key: string]: string };
+  options?: { label: string; value: string }[];
 }
 
 @Component({
@@ -25,7 +27,8 @@ export interface FormField {
     NzFormModule, 
     NzInputModule, 
     NzButtonModule,
-    NzCheckboxModule
+    NzCheckboxModule,
+    NzSelectModule,
   ],
   templateUrl: './form.component.html',
 })

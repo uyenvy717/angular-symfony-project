@@ -12,6 +12,12 @@
               <label nz-checkbox [formControlName]="field.name">
                 {{ field.label }}
               </label>
+            } @else if (field.type === 'select') {
+              <nz-select [formControlName]="field.name" [nzPlaceHolder]="field.placeholder || field.label">
+                @for (option of field.options || []; track option.value) {
+                  <nz-option [nzValue]="option.value" [nzLabel]="option.label"></nz-option>
+                }
+              </nz-select>
             } @else {
               <nz-input-group [nzPrefixIcon]="field.icon || ''">
                 <input 

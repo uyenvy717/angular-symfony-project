@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   OnInit,
@@ -26,6 +27,8 @@ import {
   FormComponent,
   FormField,
 } from '../../components/ui/form/form.component';
+import { AuthService } from '../../services/auth.service';
+import { PartnerService } from '../../services/partner.service';
 
 type ModalMode = 'create' | 'edit';
 
@@ -44,6 +47,11 @@ interface Client {
   };
   startDate: string;
   partnerName?: string;
+}
+
+interface PartnerRelated {
+  label: string,
+  value: string,
 }
 
 @Component({
@@ -109,23 +117,27 @@ export class ClientComponent implements OnInit {
   error = signal<string | null>(null);
   router = inject(Router);
   private clientService = inject(ClientService);
+  private authService = inject(AuthService);
+  private partnerService = inject(PartnerService);
 
   isModalVisible = signal<boolean>(false);
   modalMode = signal<ModalMode>('create');
   selectedClient = signal<ClientJsonldClientApiRead | null>(null);
 
   createForm: FormGroup;
-  // submitting = signal<boolean>(false);
   private fb = inject(FormBuilder);
 
-  formFields: FormField[] = [
+  partnerOptions = signal<PartnerRelated[]>([]);
+
+  formFields = computed<FormField[]>(() => [
     {
       name: 'name',
       type: 'text',
       label: 'Name',
       required: true,
       errorMessages: {
-        required: 'Name is required'
+        required: 'Name is required',
+        email: ''
       }
     },
     {
@@ -146,9 +158,10 @@ export class ClientComponent implements OnInit {
     },
     {
       name: 'partner',
-      type: 'text',
-      label: 'Partner (ID or URI)',
-      required: true
+      type: 'select',
+      label: 'Partner',
+      required: true,
+      options: this.partnerOptions()
     },
     {
       name: 'isActive',
@@ -156,20 +169,23 @@ export class ClientComponent implements OnInit {
       label: 'Active',
       required: false
     }
-  ];
+  ]);
+  firstPartner = computed(() => this.partnerOptions()[0]?.value || null);
+  currentPartner = computed(() => this.partnerOptions().find(f => f.value === this.selectedClient()?.partner?.['@id'])?.value || null);
 
   constructor(private message: NzMessageService) {
     this.createForm = this.fb.group({
       name: [null, [Validators.required]],
       email: [null, [Validators.required, Validators.email]],
       startDate: [null],
-      partner: [null, [Validators.required]],
+      partner: [this.partnerOptions()[0]?.value || null, [Validators.required]],
       isActive: [true],
     });
   }
 
   ngOnInit(): void {
     this.loadClients();
+    this.loadRelatedPartners();
   }
 
   loadClients(): void {
@@ -205,6 +221,30 @@ export class ClientComponent implements OnInit {
     }
   }
 
+  loadRelatedPartners() {
+    if (this.authService.isSuperAdmin()) {
+      this.partnerService.fetchPartners().subscribe({
+        next: (response) => {
+          const options = response.member.map((partner: any) => ({
+            label: partner.name,
+            value: partner['@id']
+          }));
+          this.partnerOptions.set(options);
+        }
+      });
+    } else if (this.authService.isGrowthPartner()) {
+      this.partnerService.fetchAllTypes().subscribe({
+        next: (partners) => {
+          console.log(partners);
+        }
+      })
+    } else {
+      console.log(this.authService.getName());
+      console.log(this.authService.getId());
+    }
+    return null;
+  }
+
   onRowClick(client: ClientJsonldClientApiRead) {
     if (!client['@id']) {
       this.message.error('Invalid client ID');
@@ -221,7 +261,10 @@ export class ClientComponent implements OnInit {
   openCreateModal(): void {
     this.modalMode.set('create');
     this.selectedClient.set(null);
-    this.createForm.reset({ isActive: true });
+    this.createForm.reset({
+      isActive: true,
+      partner: this.firstPartner()
+    });
     this.isModalVisible.set(true);
   }
 
@@ -237,7 +280,7 @@ export class ClientComponent implements OnInit {
       name: client.name,
       email: client.email,
       startDate: startDate,
-      partner: client.partner?.['@id'],
+      partner: this.currentPartner(),
       isActive: client.active,
     });
     this.isModalVisible.set(true);
@@ -245,7 +288,10 @@ export class ClientComponent implements OnInit {
 
   closeModal(): void {
     this.isModalVisible.set(false);
-    this.createForm.reset({ isActive: true });
+    this.createForm.reset({
+      isActive: true,
+      partner: this.firstPartner()
+    });
     this.selectedClient.set(null);
   }
 

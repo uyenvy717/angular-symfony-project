@@ -102,4 +102,5 @@ export class AuthService {
   }
 
   getName = computed(() => this.tokenInfo()?.name);
+  getId = computed(() => this.tokenInfo()?.partner?.id as string);
 } 
