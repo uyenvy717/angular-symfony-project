@@ -6,4 +6,5 @@ export interface ApiPost {
   email?: string;
   name?: string;
   partner?: string;
+  isActive?: boolean;
 }

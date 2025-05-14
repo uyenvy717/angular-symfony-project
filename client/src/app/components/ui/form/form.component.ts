@@ -6,10 +6,18 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
 
 export interface FormField {
   name: string;
-  type: 'text' | 'email' | 'password' | 'date' | 'checkbox' | 'select';
+  type:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'date'
+    | 'checkbox'
+    | 'select'
+    | 'radio';
   label: string;
   placeholder?: string;
   icon?: string;
@@ -29,6 +37,7 @@ export interface FormField {
     NzButtonModule,
     NzCheckboxModule,
     NzSelectModule,
+    NzRadioModule,
   ],
   templateUrl: './form.component.html',
 })

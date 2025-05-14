@@ -4,7 +4,9 @@
       @for (column of columns(); track column.key) {
         <th>{{ column.title }}</th>
       }
-      <th>Action</th>
+      @if (canManageAccounts()) {
+        <th>Action</th>
+      }
     </tr>
   </thead>
   <tbody>
@@ -23,22 +25,26 @@
             }
           </td>
         }
-        <td>
-          <div class="flex gap-2">
-            <app-button 
-              [color]="'gold'"
-              [icon]="'edit'"
-              (click)="$event.stopPropagation(); onEdit.emit(data)">
-            </app-button>
-            @if (showToggleButton()) {
-              <app-button 
-                [color]="data.active ? 'gold' : 'secondary'"
-                [icon]="data.active ? 'pause-circle' : 'play-circle'"
-                (click)="$event.stopPropagation(); onToggleActive.emit(data)">
+        @if (canManageAccounts()) { 
+          <td>
+            <div class="flex gap-2">
+              <app-button
+                [color]="'gold'"
+                [icon]="'edit'"
+                [disabled]="disableButtonFn()(data)"
+                (click)="$event.stopPropagation(); handleEdit.emit(data)">
               </app-button>
-            }
-          </div>
-        </td>
+              @if (showStatusButton()) {
+                <app-button
+                  [color]="data.active ? 'magenta' : 'gold'"
+                  [icon]="data.active ? 'pause-circle' : 'play-circle'"
+                  [disabled]="disableButtonFn()(data)"
+                  (click)="$event.stopPropagation(); handleStatus.emit(data)">
+                </app-button>
+              }
+            </div>
+          </td>
+        }
       </tr>
     }
   </tbody>

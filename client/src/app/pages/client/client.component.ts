@@ -29,6 +29,7 @@ import {
 } from '../../components/ui/form/form.component';
 import { AuthService } from '../../services/auth.service';
 import { PartnerService } from '../../services/partner.service';
+import { OptionType } from '../../services/options.service';
 
 type ModalMode = 'create' | 'edit';
 
@@ -49,10 +50,7 @@ interface Client {
   partnerName?: string;
 }
 
-interface PartnerRelated {
-  label: string,
-  value: string,
-}
+
 
 @Component({
   selector: 'app-client',
@@ -127,7 +125,7 @@ export class ClientComponent implements OnInit {
   createForm: FormGroup;
   private fb = inject(FormBuilder);
 
-  partnerOptions = signal<PartnerRelated[]>([]);
+  partnerOptions = signal<OptionType[]>([]);
 
   formFields = computed<FormField[]>(() => [
     {
@@ -170,7 +168,7 @@ export class ClientComponent implements OnInit {
       required: false
     }
   ]);
-  firstPartner = computed(() => this.partnerOptions()[0]?.value || null);
+  firstPartnerOption = computed(() => this.partnerOptions()[0]?.value || null);
   currentPartner = computed(() => this.partnerOptions().find(f => f.value === this.selectedClient()?.partner?.['@id'])?.value || null);
 
   constructor(private message: NzMessageService) {
@@ -178,7 +176,8 @@ export class ClientComponent implements OnInit {
       name: [null, [Validators.required]],
       email: [null, [Validators.required, Validators.email]],
       startDate: [null],
-      partner: [this.partnerOptions()[0]?.value || null, [Validators.required]],
+      // partner: [this.partnerOptions()[0]?.value || null, [Validators.required]],
+      partner: [this.firstPartnerOption(), [Validators.required]],
       isActive: [true],
     });
   }
@@ -233,7 +232,7 @@ export class ClientComponent implements OnInit {
         }
       });
     } else {
-      const options: PartnerRelated[] = [];
+      const options: OptionType[] = [];
 
       this.partnerService.fetchPartner(this.authService.getPartnerId()).subscribe({
         next: (response) => {
@@ -278,7 +277,7 @@ export class ClientComponent implements OnInit {
     this.selectedClient.set(null);
     this.createForm.reset({
       isActive: true,
-      partner: this.firstPartner()
+      partner: this.firstPartnerOption()
     });
     this.isModalVisible.set(true);
   }
@@ -303,14 +302,14 @@ export class ClientComponent implements OnInit {
 
   closeModal(): void {
     this.isModalVisible.set(false);
-    this.createForm.reset({
-      isActive: true,
-      partner: this.firstPartner()
-    });
+    // this.createForm.reset({
+    //   isActive: true,
+    //   partner: this.firstPartnerOption()
+    // });
     this.selectedClient.set(null);
   }
 
-  submitForm = (): void => {
+  submitForm = (): void =>  {
     if (this.createForm.invalid) return;
 
     const formData = this.createForm.value;
@@ -326,14 +325,13 @@ export class ClientComponent implements OnInit {
           this.message.success('Client created successfully');
           this.loadClients();
           this.closeModal();
-          this.loading.set(false);
         },
         error: (err) => {
           console.error('Failed to create client:', err);
           this.message.error('Failed to create client');
-          this.loading.set(false);
         },
       });
+      this.loading.set(false);
     } else {
       // Edit mode
       const clientId = this.selectedClient()?.['@id'];
@@ -348,14 +346,13 @@ export class ClientComponent implements OnInit {
           this.message.success('Client updated successfully');
           this.loadClients();
           this.closeModal();
-          this.loading.set(false);
         },
         error: (err) => {
           console.error('Failed to update client:', err);
           this.message.error('Failed to update client');
-          this.loading.set(false);
         },
       });
+      this.loading.set(false);
     }
   };
 }

@@ -61,15 +61,7 @@ export class PartnerService {
   // For SUPER_ADMIN and the partner's users
   fetchPartner(id: ExtendedPartnerDto['id']) {
     if (!id) throw new Error('Partner ID is required');
-    return this.service.apiPartnersIdGet({ id: id })
-      .pipe(
-        tap(parent => {
-          this.partners.update(partners => {
-            partners.push(parent);
-            return partners;
-          });
-        })
-      )
+    return this.service.apiPartnersIdGet({ id: id });
   }
 
   fetchByRegisteredPartner(type: PartnerType, id: string) {

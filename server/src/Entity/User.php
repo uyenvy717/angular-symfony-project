@@ -16,21 +16,24 @@ use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
-use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "portal_user")]
 #[ApiResource(
     operations: [
         new Get(
+            normalizationContext: ['groups' => ['user:read']],
             security: "is_granted('ROLE_SUPER_ADMIN')
                 or object.getPartner() == user.getPartner()
                 or object.getPartner().getRegisteredPartner() == user.getPartner()"
         ),
         new GetCollection(
+            normalizationContext: ['groups' => ['user:read']],
             provider: UserProvider::class
         ),
         new GetCollection(
@@ -42,16 +45,19 @@ use Symfony\Component\Serializer\Attribute\Ignore;
                     identifiers: ['id']
                 )
             ],
+            normalizationContext: ['groups' => ['user:read']],
             name: 'get_users_by_registered_partner',
             provider: UserProvider::class
         ),
         new Post(
-            denormalizationContext: ['groups' => ['user:post']],
+            normalizationContext: ['groups' => ['user:read']],
+            denormalizationContext: ['groups' => ['user:post:write']],
             securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
                 or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
                 or object.getPartner().getRegisteredPartner() and object.getPartner().getRegisteredPartner()  == user.getPartner()"
         ),
         new Patch(
+            normalizationContext: ['groups' => ['user:read']],
             denormalizationContext: ['groups' => ['user:patch']],
             security: "is_granted('ROLE_SUPER_ADMIN')
                 or (is_granted('ROLE_ADMIN') and object.getPartner() == user.getPartner())
@@ -59,30 +65,38 @@ use Symfony\Component\Serializer\Attribute\Ignore;
         ),
     ]
 )]
+#[UniqueEntity(fields: ['name'], message: 'This name is already in use.')]
+#[UniqueEntity(fields: ['email'], message: 'This email is already in use.')]
 class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
 {
     use IDScheme;
     #[ORM\Column]
+    #[Groups(['user:patch'])]
     private bool $isActive;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['user:read', 'user:post:write', 'user:patch'])]
     private string $name;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['user:post:write'])]
     private string $email;
 
-    #[ORM\Column(type: 'json')]
-    private array $roles = [];
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['user:read', 'user:post:write', 'user:patch'])]
+    private ?array $roles = [];
 
     #[ORM\Column(type: 'string')]
-    #[Ignore]
+    #[Groups(['user:post:write'])]
     private string $password;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    #[Groups(['user:read'])]
     private ?DateTimeImmutable $lastLoggedIn;
 
     #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "users")]
     #[ORM\JoinColumn]
+    #[Groups(['user:read', 'user:post:write', 'user:patch'])]
     private Partner $partner;
 
     /**
@@ -99,11 +113,13 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         $this->partner = $partner;
     }
 
+    #[Groups(['user:read'])]
     public function isActive(): bool
     {
         return $this->isActive;
     }
 
+    #[Groups(['user:read'])]
     public function getUserIdentifier(): string
     {
         return $this->email;
@@ -126,8 +142,12 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): self
+    public function setRoles(?array $roles): self
     {
+        // If roles is null or empty, assign ROLE_USER
+        if (empty($roles)) {
+            $roles = ['ROLE_USER'];
+        }
         $this->roles = $roles;
 
         return $this;
@@ -143,19 +163,16 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         return $this->partner;
     }
 
-    #[Groups(['user:patch'])]
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
     }
 
-    #[Groups(['user:post', 'user:patch'])]
     public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    #[Groups(['user:post'])]
     public function setEmail(string $email): void
     {
         $this->email = $email;
@@ -166,15 +183,14 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         $this->lastLoggedIn = $lastLoggedIn;
     }
 
-    #[Groups(['user:post'])]
     public function setPartner(Partner $partner): void
     {
         $this->partner = $partner;
     }
 
-    #[Groups(['user:post'])]
     public function setPassword(string $password): void
     {
+//        UserPasswordHasherInterface::
         $this->password = $password;
     }
 
@@ -183,7 +199,7 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
         // Implement eraseCredentials() method.
     }
 
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
     }

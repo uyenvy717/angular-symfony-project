@@ -1,9 +1,10 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { PartnerTypeEnum } from './partner.service';
+import { OptionsService } from './options.service';
 
 interface LoginResponse {
   token: string;
@@ -25,20 +26,25 @@ interface TokenPayload {
   providedIn: 'root',
 })
 export class AuthService {
+  private router = inject(Router);
+  private optionService = inject(OptionsService);
   private apiUrl = environment.authUrl;
   private tokenKey = 'auth_token';
   private tokenInfo = signal<TokenPayload | null>(null);
-  private userRoles = computed(() => this.tokenInfo()?.roles);
-  isSuperAdmin = computed(() =>  this.userRoles()?.includes('ROLE_SUPER_ADMIN'))
   isGrowthPartner = computed(() =>  this.tokenInfo()?.partner?.type?.includes(PartnerTypeEnum.GROWTH));
+  
+  private userRoles = computed(() => this.tokenInfo()?.roles);
+  isSuperAdmin = computed(() =>  this.userRoles()?.includes('ROLE_SUPER_ADMIN'));
+  isNotAdmin = computed(() => this.userRoles()?.toString() === ['ROLE_USER'].toString());
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient) {
     // Initialize roles from token if it exists
     this.initializeAccount();
   }
 
   private initializeAccount() {
     this.tokenInfo.set(this.getDecodedToken());
+    this.optionService.setRole(this.userRoles()?.[0] ?? '');
     const isExpired = this.isTokenExpired(this.tokenInfo());
     if (isExpired) {
       this.logout();
@@ -103,4 +109,14 @@ export class AuthService {
 
   getName = computed(() => this.tokenInfo()?.name);
   getPartnerId = computed(() => this.tokenInfo()?.partner?.id as string);
+
+  // TODO set the roles again
+  setRoles = (roles: any) => {
+    if (!roles) {
+      return;
+    }
+    console.log('Set roles', roles);
+
+    this.userRoles = roles;
+  }
 } 

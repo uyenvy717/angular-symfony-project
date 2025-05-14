@@ -30,3 +30,11 @@
     @apply bg-secondary-dark;
   }
 }
+
+button:disabled,
+.disabled-btn {
+  background-color: #e0e0e0 !important;
+  color: #a0a0a0 !important;
+  border: none !important;
+  cursor: not-allowed !important;
+}

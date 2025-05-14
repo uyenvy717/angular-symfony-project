@@ -23,6 +23,7 @@ export class ButtonComponent {
   buttonType = input<string>('base-btn');
   color = input<string>('magenta');
   icon = input<string>('');
+  disabled = input<boolean>(false);
 
   private iconService = inject(NzIconService);
 

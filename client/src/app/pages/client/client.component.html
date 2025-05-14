@@ -15,7 +15,7 @@
     <app-table 
       [data]="clients()" 
       [columns]="columns"
-      (onEdit)="openEditModal($event)"
+      (handleEdit)="openEditModal($event)"
       (rowClick)="onRowClick($event)">
     </app-table>
   }
