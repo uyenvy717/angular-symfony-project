@@ -4,7 +4,7 @@
       @for (column of columns(); track column.key) {
         <th>{{ column.title }}</th>
       }
-      @if (canManageAccounts()) {
+      @if (canManage()) {
         <th>Action</th>
       }
     </tr>
@@ -25,7 +25,7 @@
             }
           </td>
         }
-        @if (canManageAccounts()) { 
+        @if (canManage()) {
           <td>
             <div class="flex gap-2">
               <app-button

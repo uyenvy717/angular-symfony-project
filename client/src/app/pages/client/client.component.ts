@@ -50,8 +50,6 @@ interface Client {
   partnerName?: string;
 }
 
-
-
 @Component({
   selector: 'app-client',
   imports: [
@@ -115,9 +113,10 @@ export class ClientComponent implements OnInit {
   error = signal<string | null>(null);
   router = inject(Router);
   private clientService = inject(ClientService);
-  private authService = inject(AuthService);
+  protected authService = inject(AuthService);
   private partnerService = inject(PartnerService);
 
+  canManageClients = computed(() => this.authService.isNotAdmin());
   isModalVisible = signal<boolean>(false);
   modalMode = signal<ModalMode>('create');
   selectedClient = signal<ClientJsonldClientApiRead | null>(null);
@@ -176,7 +175,6 @@ export class ClientComponent implements OnInit {
       name: [null, [Validators.required]],
       email: [null, [Validators.required, Validators.email]],
       startDate: [null],
-      // partner: [this.partnerOptions()[0]?.value || null, [Validators.required]],
       partner: [this.firstPartnerOption(), [Validators.required]],
       isActive: [true],
     });
@@ -302,10 +300,6 @@ export class ClientComponent implements OnInit {
 
   closeModal(): void {
     this.isModalVisible.set(false);
-    // this.createForm.reset({
-    //   isActive: true,
-    //   partner: this.firstPartnerOption()
-    // });
     this.selectedClient.set(null);
   }
 

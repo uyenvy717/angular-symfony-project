@@ -19,7 +19,7 @@
       [columns]="columns"
       (rowClick)="onRowClick($event)"
       [showStatusButton]="true"
-      [canManageAccounts]="canManageAccounts()"
+      [canManage]="canManageAccounts()"
       (handleEdit)="openEditModal($event)"
       [disableButtonFn]="shouldDisableButton"
       (handleStatus)="changeStatus($event)">

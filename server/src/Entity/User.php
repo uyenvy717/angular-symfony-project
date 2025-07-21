@@ -190,7 +190,6 @@ class User implements IDable, UserInterface, PasswordAuthenticatedUserInterface
 
     public function setPassword(string $password): void
     {
-//        UserPasswordHasherInterface::
         $this->password = $password;
     }
 

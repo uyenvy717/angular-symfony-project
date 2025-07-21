@@ -20,4 +20,4 @@ class UserChecker implements UserCheckerInterface
     {
         // No post-auth checks needed for now
     }
-} 
+}

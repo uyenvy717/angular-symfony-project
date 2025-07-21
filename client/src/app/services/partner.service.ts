@@ -2,11 +2,13 @@ import { inject, Injectable, signal } from '@angular/core';
 import { forkJoin, Observable, tap } from 'rxjs';
 import {
   ApiAffiliatePartnerService,
+  ApiGrowthPartnerService,
   ApiPartnerService,
   ApiSolutionPartnerService,
   ApiSolutionProviderService,
 } from '../api/services';
 import {
+  AffiliatePartnerApiJsonldPost,
   AffiliatePartnerApiJsonldRead,
   GrowthPartnerApiJsonldRead,
   PartnerApiJsonld,
@@ -39,6 +41,10 @@ export type ResponsePartnerType =
 export interface ExtendedPartnerDto extends PartnerDto {
   startDate?: string;
   endDate?: string;
+  contactPerson?: string;
+  registeredPartnerName?: string;
+  registeredPartner?: string;
+  renewalInterval?: string;
 }
 
 @Injectable({
@@ -46,6 +52,7 @@ export interface ExtendedPartnerDto extends PartnerDto {
 })
 export class PartnerService {
   private readonly service = inject(ApiPartnerService);
+  private readonly gService = inject(ApiGrowthPartnerService);
   private readonly spaService = inject(ApiSolutionPartnerService);
   private readonly sprService = inject(ApiSolutionProviderService);
   private readonly aService = inject(ApiAffiliatePartnerService);
@@ -84,7 +91,9 @@ export class PartnerService {
 
   fetchByType(type: PartnerType) {
     let request$: Observable<{ member: Array<ExtendedPartnerDto> }>;
-    if (type === PartnerTypeEnum.SOLUTION) {
+    if (type === PartnerTypeEnum.GROWTH) {
+      request$ = this.service.apiGrowthPartnersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;
+    } else if (type === PartnerTypeEnum.SOLUTION) {
       request$ = this.service.apiSolutionPartnersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;
     } else if (type === PartnerTypeEnum.PROVIDER) {
       request$ = this.service.apiSolutionProvidersGetCollection() as Observable<{ member: Array<ExtendedPartnerDto> }>;
@@ -123,5 +132,29 @@ export class PartnerService {
 
   getPartnerById(id: ExtendedPartnerDto['id']) {
     return this.partners().find((partner) => partner.id === id);
+  }
+
+  createPartner(type: PartnerType, partner: AffiliatePartnerApiJsonldPost) {
+    if (type === PartnerTypeEnum.GROWTH) {
+      return this.gService.apiGrowthPartnersPost({ body: partner });
+    } else if (type === PartnerTypeEnum.SOLUTION) {
+      return this.spaService.apiSolutionPartnersPost({ body: partner });
+    } else if (type === PartnerTypeEnum.PROVIDER) {
+      return this.sprService.apiSolutionProvidersPost({ body: partner });
+    } else {
+      return this.aService.apiAffiliatePartnersPost({ body: partner });
+    }
+  }
+
+  updatePartner(type: PartnerType, id: string, partner: AffiliatePartnerApiJsonldPost) {
+    if (type === PartnerTypeEnum.GROWTH) {
+      return this.gService.apiGrowthPartnersIdPatch({ id: id, body: partner });
+    } else if (type === PartnerTypeEnum.SOLUTION) {
+      return this.spaService.apiSolutionPartnersIdPatch({ id: id, body: partner });
+    } else if (type === PartnerTypeEnum.PROVIDER) {
+      return this.sprService.apiSolutionProvidersIdPatch({ id: id, body: partner });
+    } else {
+      return this.aService.apiAffiliatePartnersIdPatch({ id: id, body: partner });
+    }
   }
 } 

@@ -32,4 +32,4 @@ class JwtPayloadEnhancer implements EventSubscriberInterface
 
         $event->setData($data);
     }
-} 
+}

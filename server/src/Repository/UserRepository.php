@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\GrowthPartner;
 use App\Entity\Partner;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

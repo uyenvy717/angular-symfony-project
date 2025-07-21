@@ -37,7 +37,7 @@ export class TableComponent {
   data = input<any[]>([]);
   columns = input<Column[]>([]);
   showStatusButton = input<boolean>(false);
-  canManageAccounts = input<boolean>(true);
+  canManage = input<boolean>(true);
   disableButtonFn = input<(row: any) => boolean>(() => false);
 
   handleEdit = output<any>();

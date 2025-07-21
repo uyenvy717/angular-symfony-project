@@ -1,5 +1,6 @@
 import {
   ActivatedRouteSnapshot,
+  Router,
   RouterModule,
   RouterStateSnapshot,
   Routes,
@@ -13,6 +14,20 @@ import { InsideDashboardComponent } from './dashboard/inside-dashboard/inside-da
 import { PartnerService } from '../services/partner.service';
 import { ClientService } from '../services/client.service';
 import { UserService } from '../services/user.service';
+import { AuthService } from '../services/auth.service';
+
+// Define the guard as a const function
+const growthPartnerGuard = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  // If not a growth partner, redirect to dashboard
+  if (!authService.isGrowthPartner()) {
+    router.navigate(['/dashboard']);
+    return false;
+  }
+  return true;
+};
 
 const routes: Routes = [
   {
@@ -21,6 +36,7 @@ const routes: Routes = [
   },
   {
     path: 'partners',
+    canActivate: [growthPartnerGuard],
     children: [
       {
         path: '',

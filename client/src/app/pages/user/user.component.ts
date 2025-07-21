@@ -82,6 +82,13 @@ export class UserComponent implements OnInit {
   private authService = inject(AuthService);
   private optionService = inject(OptionsService);
 
+  roleOptions = computed(() => {
+    const options = this.optionService.roleOptions();
+    if (this.authService.isSuperAdmin() && !this.partnerData()) {
+      return [{ label: 'Super Admin', value: 'ROLE_SUPER_ADMIN' }, ...options];
+    }
+    return options;
+  });
   canManageAccounts = computed(() => !(!this.partnerData() && this.authService.isNotAdmin()));
   isModalVisible = signal<boolean>(false);
   modalMode = signal<ModalMode>('create');
@@ -116,7 +123,7 @@ export class UserComponent implements OnInit {
         type: 'radio',
         label: 'Role',
         required: true,
-        options: this.optionService.roleOptions()
+        options: this.roleOptions()
       },
       {
         name: 'isActive',
@@ -348,9 +355,8 @@ export class UserComponent implements OnInit {
       const id = userId.split('/').pop() || '';
 
       this.userService.updateUser(id, formData).subscribe({
-        next: (res) => {
+        next: () => {
           this.message.success('User updated successfully');
-          this.authService.setRoles(res?.roles);
           this.loadUsers();
           this.closeModal();
         },

@@ -109,14 +109,4 @@ export class AuthService {
 
   getName = computed(() => this.tokenInfo()?.name);
   getPartnerId = computed(() => this.tokenInfo()?.partner?.id as string);
-
-  // TODO set the roles again
-  setRoles = (roles: any) => {
-    if (!roles) {
-      return;
-    }
-    console.log('Set roles', roles);
-
-    this.userRoles = roles;
-  }
 } 
