@@ -1,0 +1,45 @@
+<div class="flex flex-row justify-between">
+  <h1 class="text-2xl font-bold mb-4">User</h1>
+  @if (canManageAccounts()) {
+    <app-button [color]="'gold'" [label]="'+ Create User'" (click)="openCreateModal()"></app-button>
+  }
+</div>
+<div class="user-container">
+  @if (error(); as error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  } @else if (loading()) {
+    <div class="loading-container">
+      <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+    </div>
+  } @else {
+    <app-table
+      [data]="users()"
+      [columns]="columns"
+      (rowClick)="onRowClick($event)"
+      [showStatusButton]="true"
+      [canManage]="canManageAccounts()"
+      (handleEdit)="openEditModal($event)"
+      [disableButtonFn]="shouldDisableButton"
+      (handleStatus)="changeStatus($event)">
+    </app-table>
+  }
+</div>
+
+<nz-modal
+  [nzVisible]="isModalVisible()"
+  [nzTitle]="modalMode() === 'create' ? 'Create a new user' : 'Edit the user'"
+  [nzFooter]="null"
+  (nzOnCancel)="closeModal()"
+  [nzWidth]="520"
+>
+  <ng-container *nzModalContent>
+    <app-form
+      [formGroup]="createForm"
+      [onSubmit]="submitForm"
+      [fields]="formFields()"
+      [submitButtonText]="modalMode() === 'create' ? 'Create' : 'Save'"
+    ></app-form>
+  </ng-container>
+</nz-modal>

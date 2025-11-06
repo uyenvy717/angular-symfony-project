@@ -1,0 +1,51 @@
+<nz-card [nzTitle]="partnerData ? 'Partner Information' : clientData? 'Client Information' : userData? 'User Information' : 'Card title'">
+  @if (showTable) {
+  } @else if (showContent) {
+    @if (partnerData) {
+      <div class="partner-info">
+        <div class="info-item">
+          <strong>Name:</strong> {{ partnerData.name }}
+        </div>
+        <div class="info-item">
+          <strong>Email:</strong> {{ partnerData.email }}
+        </div>
+        <div class="info-item">
+          <strong>Start Date:</strong> {{ partnerData.startDate | date }}
+        </div>
+        <div class="info-item">
+          <strong>End Date:</strong> {{ partnerData.endDate | date }}
+        </div>
+      </div>
+    } @else if (clientData) {
+      <div class="partner-info">
+        <div class="info-item">
+          <strong>Name:</strong> {{ clientData.name }}
+        </div>
+        <div class="info-item">
+          <strong>Email:</strong> {{ clientData.email }}
+        </div>
+        <div class="info-item">
+          <strong>Start Date:</strong> {{ clientData.startDate | date }}
+        </div>
+      </div>
+    } @else if (userData) {
+      <div class="partner-info">
+        <div class="info-item">
+          <strong>Name:</strong> {{ userData.name }}
+        </div>
+        <div class="info-item">
+          <strong>Status:</strong> {{ userData.active }}
+        </div>
+<!--        <div class="info-item">-->
+<!--          <strong>Start Date:</strong> {{ clientData.startDate | date }}-->
+<!--        </div>-->
+      </div>
+    } @else {
+      <div>
+        <p>Card content</p>
+        <p>Card content</p>
+        <p>Card content</p>
+      </div>
+    }
+  }
+</nz-card>

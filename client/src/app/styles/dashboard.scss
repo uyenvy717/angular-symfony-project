@@ -1,0 +1,25 @@
+.dashboard {
+  @apply grid-areas-main-dashboard;
+  .statistic {
+    grid-area: statistic;
+  }
+
+  .metric {
+    grid-area: metric;
+  }
+
+  .metric2 {
+    grid-area: metric2;
+  }
+}
+
+.inside-dashboard {
+  @apply grid-areas-inside-dashboard;
+  .statistic {
+    grid-area: statistic;
+  }
+
+  .list {
+    grid-area: list;
+  }
+}

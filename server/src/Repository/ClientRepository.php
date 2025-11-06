@@ -20,27 +20,38 @@ class ClientRepository extends ServiceEntityRepository
 
     public function findClientsByPartner(?Partner $partner): array
     {
+        if (!$partner) {
+            return [];
+        }
+
         $query = $this->createQueryBuilder('c');
 
-        if ($partner) {
-            if ($partner instanceof GrowthPartner) {
-                $query->where('c.partner = :partner')
-                    ->orWhere('c.partner IN (
-                    SELECT a FROM App\Entity\AffiliatePartner a WHERE a.registeredPartner = :partner
-                )')
-                    ->orWhere('c.partner IN (
-                    SELECT spa FROM App\Entity\SolutionPartner spa WHERE spa.registeredPartner = :partner
-                )')
-                    ->orWhere('c.partner IN (
-                    SELECT spr FROM App\Entity\SolutionProvider spr WHERE spr.registeredPartner = :partner
-                )')
-                    ->setParameter('partner', $partner);
-            } else {
-                $query->where('c.partner = :partner');
-            }
-
+        if ($partner instanceof GrowthPartner) {
+            $query->where('c.partner = :partner')
+                ->orWhere('c.partner IN (
+                SELECT a FROM App\Entity\AffiliatePartner a WHERE a.registeredPartner = :partner
+            )')
+                ->orWhere('c.partner IN (
+                SELECT spa FROM App\Entity\SolutionPartner spa WHERE spa.registeredPartner = :partner
+            )')
+                ->orWhere('c.partner IN (
+                SELECT spr FROM App\Entity\SolutionProvider spr WHERE spr.registeredPartner = :partner
+            )')
+                ->setParameter('partner', $partner);
+        } else {
+            $query->where('c.partner = :partner')
+                ->setParameter('partner', $partner);
         }
 
         return $query->getQuery()->getResult();
+    }
+
+    public function findClientsByPartnerId(string $partnerId): array
+    {
+        $partner = $this->getEntityManager()
+            ->getRepository(Partner::class)
+            ->find($partnerId);
+
+        return $this->findClientsByPartner($partner);
     }
 }

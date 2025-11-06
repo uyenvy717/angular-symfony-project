@@ -1,0 +1,51 @@
+<nz-table #basicTable [nzData]="data()" [nzNoResult]="'No data available'">
+  <thead>
+    <tr>
+      @for (column of columns(); track column.key) {
+        <th>{{ column.title }}</th>
+      }
+      @if (canManage()) {
+        <th>Action</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (data of basicTable.data; track data) {
+      <tr (click)="rowClick.emit(data)" style="cursor: pointer">
+        @for (column of columns(); track column.key) {
+          <td>
+            @if (column.render) {
+              @if (column.title === 'Account Status' || column.key === 'active') {
+                <nz-tag [nzColor]="data[column.key] ? 'success' : 'magenta'" [nzBordered]="false">{{ column.render(data) }}</nz-tag>
+              } @else {
+                {{ column.render(data) }}
+              }
+            } @else {
+              {{ data[column.key] }}
+            }
+          </td>
+        }
+        @if (canManage()) {
+          <td>
+            <div class="flex gap-2">
+              <app-button
+                [color]="'gold'"
+                [icon]="'edit'"
+                [disabled]="disableButtonFn()(data)"
+                (click)="$event.stopPropagation(); handleEdit.emit(data)">
+              </app-button>
+              @if (showStatusButton()) {
+                <app-button
+                  [color]="data.active ? 'magenta' : 'gold'"
+                  [icon]="data.active ? 'pause-circle' : 'play-circle'"
+                  [disabled]="disableButtonFn()(data)"
+                  (click)="$event.stopPropagation(); handleStatus.emit(data)">
+                </app-button>
+              }
+            </div>
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</nz-table>

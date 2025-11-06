@@ -73,7 +73,7 @@ class PartnerTest extends AbstractTest
         ];
 
         $partnerRepository = static::getContainer()->get(PartnerRepository::class);
-        $growthPartner = $partnerRepository->findOneBy(['name' => 'growth']);
+        $growthPartner = $partnerRepository->findOneBy(['name' => 'Mochadocs']);
         $growthPartnerId = $growthPartner->getId();
 
         $response = $this->createClientWithCredentials(null, $this->body)->request('PATCH', '/api/growth_partners/'.$growthPartnerId, [
@@ -152,7 +152,7 @@ class PartnerTest extends AbstractTest
 
         // Cannot create a solution partner out of the scope
         $growthPartnerRepository = $this->getContainer()->get(GrowthPartnerRepository::class);
-        $growthPartnerId = $growthPartnerRepository->findOneBy(['name' => 'growth2'])->getId();
+        $growthPartnerId = $growthPartnerRepository->findOneBy(['name' => 'Nordics/Baltics'])->getId();
 
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
@@ -176,7 +176,7 @@ class PartnerTest extends AbstractTest
     public function testCreateAnySolutionPartner()
     {
         $growthPartnerRepository = $this->getContainer()->get(GrowthPartnerRepository::class);
-        $growthPartnerId = $growthPartnerRepository->findOneBy(['name' => 'growth2'])->getId();
+        $growthPartnerId = $growthPartnerRepository->findOneBy(['name' => 'Nordics/Baltics'])->getId();
 
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
@@ -202,7 +202,7 @@ class PartnerTest extends AbstractTest
     public function testUpdateSolutionPartner()
     {
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
-        $solutionPartner = $partnerRepository->findOneBy(['name' => 'solutionPartner']);
+        $solutionPartner = $partnerRepository->findOneBy(['name' => 'SolutionPartner']);
 
         $payload = [
             'contactPerson' => 'testPerson',
@@ -227,7 +227,7 @@ class PartnerTest extends AbstractTest
         );
 
         // Cannot assign the solution partner to other growth partner
-        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth2'])->getId();
+        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'Nordics/Baltics'])->getId();
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId
         ];
@@ -244,7 +244,7 @@ class PartnerTest extends AbstractTest
     public function testGetSolutionProvider()
     {
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
-        $partnerId = $partnerRepository->findOneBy(['name' => 'solutionProvider'])->getId();
+        $partnerId = $partnerRepository->findOneBy(['name' => 'SolutionProvider'])->getId();
 
         $this->createClientWithCredentials()->request('GET', '/api/solution_providers/'.$partnerId);
 
@@ -279,7 +279,7 @@ class PartnerTest extends AbstractTest
         // Update the solution provider
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
         $solutionProviderId = $partnerRepository->findOneBy(['name' => 'solutionProviderTest'])->getId();
-        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth'])->getId();
+        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'Mochadocs'])->getId();
 
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,
@@ -299,7 +299,7 @@ class PartnerTest extends AbstractTest
     public function testGetAffiliatePartner()
     {
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
-        $partnerId = $partnerRepository->findOneBy(['name' => 'affiliatePartner'])->getId();
+        $partnerId = $partnerRepository->findOneBy(['name' => 'AffiliatePartner'])->getId();
 
         $this->createClientWithCredentials()->request('GET', '/api/affiliate_partners/'.$partnerId);
 
@@ -331,7 +331,7 @@ class PartnerTest extends AbstractTest
         // Update the affiliate partner
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
         $affiliatePartnerId = $partnerRepository->findOneBy(['name' => 'affiliatePartnerTest'])->getId();
-        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'growth'])->getId();
+        $growthPartnerId = $partnerRepository->findOneBy(['name' => 'Mochadocs'])->getId();
 
         $payload = [
             'registeredPartner' => '/api/growth_partners/'.$growthPartnerId,

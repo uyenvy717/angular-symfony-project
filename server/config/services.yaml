@@ -37,3 +37,14 @@ services:
         class: 'App\State\PartnerProvider'
         arguments:
             $entityClass: 'App\Entity\SolutionProvider'
+
+    App\DataPersister\UserDataPersister:
+        decorates: 'api_platform.doctrine.orm.state.persist_processor'
+        arguments:
+            - '@App\DataPersister\UserDataPersister.inner'
+            - '@security.user_password_hasher'
+
+    App\Security\UserChecker:
+        autowire: true
+        autoconfigure: true
+        # This service checks if a user is active before allowing login

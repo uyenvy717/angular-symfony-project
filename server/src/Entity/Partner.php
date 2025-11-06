@@ -3,6 +3,11 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
 use App\Repository\PartnerRepository;
 use App\Traits\IDScheme;
@@ -22,12 +27,23 @@ use Symfony\Component\Serializer\Attribute\Groups;
         "affiliate_partners" => AffiliatePartner::class
     ]
 )]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            security: "is_granted('ROLE_SUPER_ADMIN') or object == user.getPartner()",
+        ),
+        new GetCollection(),
+        new Post(),
+        new Patch(),
+        new Delete(),
+    ],
+    security: "is_granted('ROLE_SUPER_ADMIN')"
+)]
 abstract class Partner implements IDable
 {
     use IDScheme;
 
-    #[Groups(['read', 'post', 'patch'])]
+    #[Groups(['read', 'post', 'patch', 'client:read'])]
     #[ORM\Column(length: 255)]
     private string $name;
 

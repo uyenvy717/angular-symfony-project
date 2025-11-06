@@ -1,0 +1,49 @@
+<div class="flex flex-row justify-between">
+  <h1 class="text-2xl font-bold mb-4">Partner</h1>
+  <app-button [color]="'gold'" [label]="'+ Create Partner'" (click)="openCreateModal()"></app-button>
+</div>
+<div class="partner-container">
+  <nz-tabset (nzSelectedIndexChange)="onTabChange($event)">
+    @for (partnerType of partnerTabs(); track partnerType) {
+      @if (partnerType.isTabVisible) {
+        <nz-tab [nzTitle]="partnerType.label">
+          @if (error(); as error) {
+            <div class="error-message">
+              {{ error }}
+            </div>
+          } @else if (loading()) {
+            <div class="loading-container">
+              <nz-spin nzSimple [nzSpinning]="true"></nz-spin>
+            </div>
+          } @else {
+            <app-table
+              [data]="partners()"
+              [columns]="columns()"
+              (handleEdit)="openEditModal($event)"
+              (rowClick)="onRowClick($event)">
+            </app-table>
+          }
+        </nz-tab>
+      }
+    }
+  </nz-tabset>
+</div>
+
+<nz-modal
+  [nzVisible]="isModalVisible()"
+  [nzTitle]="modalMode() === 'create' ? 'Create a new partner' : 'Edit the partner'"
+  [nzFooter]="null"
+  (nzOnCancel)="closeModal()"
+  [nzWidth]="520"
+>
+  <ng-container *nzModalContent>
+    <app-form
+      [formGroup]="createForm"
+      [onSubmit]="submitForm"
+      [fields]="formFields()"
+      [submitButtonText]="modalMode() === 'create' ? 'Create' : 'Save'"
+    ></app-form>
+
+<!--    <pre>{{ createForm.value | json }}</pre>-->
+  </ng-container>
+</nz-modal>

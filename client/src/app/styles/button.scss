@@ -1,0 +1,40 @@
+.nav-panel-btn {
+  @apply flex m-1 w-5/6 justify-start justify-self-center bg-transparent py-2 pl-4 rounded transition duration-300 text-lg;
+
+  &:hover {
+    @apply bg-secondary-dark text-primary border-transparent;
+  }
+}
+
+.base-btn {
+  @apply px-3 py-1.5 text-white rounded transition-colors flex items-center gap-2;
+}
+
+.magenta {
+  @apply bg-magenta;
+  &:hover {
+    @apply bg-magenta-dark;
+  }
+}
+
+.gold {
+  @apply bg-gold;
+  &:hover {
+    @apply bg-gold-dark;
+  }
+}
+
+.secondary {
+  @apply bg-secondary;
+  &:hover {
+    @apply bg-secondary-dark;
+  }
+}
+
+button:disabled,
+.disabled-btn {
+  background-color: #e0e0e0 !important;
+  color: #a0a0a0 !important;
+  border: none !important;
+  cursor: not-allowed !important;
+}

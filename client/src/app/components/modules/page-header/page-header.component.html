@@ -1,0 +1,15 @@
+<ng-container class="header flex justify-between">
+  <div class="flex justify-between bg-primary text-secondary pt-4 px-6">
+    <div class="header-heading">
+      <h1 class="text-3xl text-secondary">Partner Portal</h1>
+    </div>
+    <div class="header-content flex items-center">
+      <div class="flex items-baseline gap-4">
+        <p class="text-lg">{{ accountName() }}</p>
+        <app-button
+          [label]="'Logout'" (click)="logout()" [color]="'magenta'">
+        </app-button>
+      </div>
+    </div>
+  </div>
+</ng-container>

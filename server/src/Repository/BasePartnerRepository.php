@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\GrowthPartner;
 use App\Entity\Partner;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
@@ -20,5 +21,23 @@ abstract class BasePartnerRepository extends ServiceEntityRepository
         }
 
         return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Find partners by registered partner ID
+     * @param string $partnerId
+     * @return array
+     */
+    public function findByRegisteredPartnerId(string $partnerId): array
+    {
+        $partner = $this->getEntityManager()
+            ->getRepository(GrowthPartner::class)
+            ->find($partnerId);
+            
+        if (!$partner) {
+            return [];
+        }
+
+        return $this->findByPartner($partner);
     }
 }

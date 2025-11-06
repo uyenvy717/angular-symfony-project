@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SolutionPartnerRepository;
@@ -23,6 +24,23 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new GetCollection(
             provider: 'App\State\PartnerProvider.Partner'
         ),
+        new GetCollection(
+            uriTemplate: '/solution_partners/by_registered_partner/{registeredPartnerId}',
+            uriVariables: [
+                'registeredPartnerId' => new Link(
+                    fromProperty: 'solutionPartners',
+                    fromClass: GrowthPartner::class,
+                    identifiers: ['id']
+                )
+            ],
+            name: 'get_solution_partners_by_registered_partner',
+            provider: 'App\State\PartnerProvider.Partner',
+//            extraProperties: [
+//                'openapi' => [
+//                    'tags' => ['Partner']
+//                ]
+//            ]
+        ),
         new Post(
             denormalizationContext: ['groups' => ['post']],
             securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
@@ -35,7 +53,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 or object.getRegisteredPartner() == user.getPartner() or object.getRegisteredPartner() == null"
         )
     ],
-    normalizationContext: ['groups' => ['read']]
+    normalizationContext: ['groups' => ['read']],
 )]
 class SolutionPartner extends Partner
 {
@@ -79,6 +97,7 @@ class SolutionPartner extends Partner
         $this->registeredPartner = $partner;
     }
 
+    #[Groups(['client:read'])]
     public function getRegisteredPartner(): ?GrowthPartner
     {
         return $this->registeredPartner;
@@ -88,5 +107,11 @@ class SolutionPartner extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
+    }
+
+    #[Groups(['client:read'])]
+    public function getRegisteredPartnerName(): ?string
+    {
+        return $this->registeredPartner?->getName();
     }
 }

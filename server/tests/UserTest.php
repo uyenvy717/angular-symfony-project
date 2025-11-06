@@ -14,7 +14,7 @@ class UserTest extends AbstractTest
         'password' => 'testpassword',
     ];
 
-    // Growth partner get users
+    // Growth partner get users in scope
     public function testGetUsers(): void
     {
         $this->createClientWithCredentials()->request('GET', '/api/users');
@@ -26,13 +26,13 @@ class UserTest extends AbstractTest
             '@context' => '/api/contexts/User',
             '@id' => '/api/users',
             '@type' => 'Collection',
-            'totalItems' => 5
+            'totalItems' => 2
         ]);
 
         $this->assertMatchesResourceItemJsonSchema(User::class);
     }
 
-    // Top-level account get all users
+    // Top-level account get users in scope
     public function testGetAllUser(): void
     {
         $this->createClientWithCredentials(null, $this->body)->request('GET', '/api/users');
@@ -44,7 +44,7 @@ class UserTest extends AbstractTest
             '@context' => '/api/contexts/User',
             '@id' => '/api/users',
             '@type' => 'Collection',
-            'totalItems' => 8
+            'totalItems' => 2
         ]);
 
         $this->assertMatchesResourceItemJsonSchema(User::class);
@@ -56,7 +56,7 @@ class UserTest extends AbstractTest
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
         $passwordHasher = $this->getContainer()->get(UserPasswordHasherInterface::class);
 
-        $partner = $partnerRepository->findOneBy(['name' => 'solutionPartner']);
+        $partner = $partnerRepository->findOneBy(['name' => 'SolutionPartner']);
 
         // Hash the password before sending it in the request
         $hashedPassword = $passwordHasher->hashPassword(new User('Test User', 'test@user.com', $partner), 'password123');
@@ -79,13 +79,13 @@ class UserTest extends AbstractTest
         $this->assertMatchesResourceItemJsonSchema(User::class);
     }
 
-    // Top-level account can create user for any partner?
+    // Top-level account can create user for any partner
     public function testCreateAnyUser(): void
     {
         $partnerRepository = $this->getContainer()->get(PartnerRepository::class);
         $passwordHasher = $this->getContainer()->get(UserPasswordHasherInterface::class);
 
-        $partner = $partnerRepository->findOneBy(['name' => 'solutionPartner2']);
+        $partner = $partnerRepository->findOneBy(['name' => 'SolutionPartner2']);
 
         // Hash the password before sending it in the request
         $hashedPassword = $passwordHasher->hashPassword(new User('Test User', 'test@user.com', $partner), 'password123');
@@ -112,7 +112,7 @@ class UserTest extends AbstractTest
     public function testUpdateUser(): void
     {
         $userRepository = $this->getContainer()->get(UserRepository::class);
-        $userId = $userRepository->findOneBy(['name' => 'aUser'])->getId();
+        $userId = $userRepository->findOneBy(['name' => 'AfflUser'])->getId();
 
         $payload = [
             'isActive' => true,
@@ -135,7 +135,7 @@ class UserTest extends AbstractTest
     public function testUpdateAnyUser(): void
     {
         $userRepository = $this->getContainer()->get(UserRepository::class);
-        $userId = $userRepository->findOneBy(['name' => 'gpUser2'])->getId();
+        $userId = $userRepository->findOneBy(['name' => 'NBUser'])->getId();
 
         $payload = [
             'isActive' => true,

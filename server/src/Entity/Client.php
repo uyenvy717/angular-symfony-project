@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Interface\IDable;
@@ -28,6 +29,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new GetCollection(
             provider: ClientProvider::class
         ),
+        new GetCollection(
+            uriTemplate: '/clients/by_registered_partner/{registeredPartnerId}',
+            uriVariables: [
+                'registeredPartnerId' => new Link(
+                    fromProperty: 'clients',
+                    fromClass: Partner::class,
+                    identifiers: ['id']
+                )
+            ],
+            name: 'get_clients_by_registered_partner',
+            provider: ClientProvider::class
+        ),
         new Post(
             denormalizationContext: ['groups' => ['client:post']],
             securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
@@ -38,18 +51,21 @@ use Symfony\Component\Serializer\Attribute\Groups;
             denormalizationContext: ['groups' => ['client:patch']],
             security: "is_granted('ROLE_SUPER_ADMIN')
                 or object.getPartner() == user.getPartner()
-                or object.getPartner().getRegisteredPartner()  == user.getPartner()"
-        ),
-        new Patch(
-            uriTemplate: '/clients/{id}/registeredPartner',
-            denormalizationContext: ['groups' => ['client:patch:assignPartner']],
-            security: "is_granted('ROLE_SUPER_ADMIN')
-                or object.getPartner().getRegisteredPartner()  == user.getPartner()
-                or object.getPartner() == user.getPartner()",
+                or object.getPartner().getRegisteredPartner()  == user.getPartner()",
             securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
-                or object.getPartner().getRegisteredPartner() == user.getPartner()
-                or object.getPartner() == user.getPartner()"
+                or object.getPartner() == user.getPartner()
+                or object.getPartner().getRegisteredPartner() == user.getPartner()"
         ),
+//        new Patch(
+//            uriTemplate: '/clients/{id}/registeredPartner',
+//            denormalizationContext: ['groups' => ['client:patch:assignPartner']],
+//            security: "is_granted('ROLE_SUPER_ADMIN')
+//                or object.getPartner().getRegisteredPartner()  == user.getPartner()
+//                or object.getPartner() == user.getPartner()",
+//            securityPostDenormalize: "is_granted('ROLE_SUPER_ADMIN')
+//                or object.getPartner().getRegisteredPartner() == user.getPartner()
+//                or object.getPartner() == user.getPartner()"
+//        ),
     ],
     normalizationContext: ['groups' => ['client:read']]
 )]
@@ -76,7 +92,7 @@ class Client implements IDable
      * a client can have a partner, but might not have one
      */
     #[ORM\ManyToOne(targetEntity: Partner::class, inversedBy: "clients")]
-    #[ORM\JoinColumn(nullable: true)]
+//    #[ORM\JoinColumn(nullable: true)]
     private ?Partner $partner;
 
     /**
@@ -107,7 +123,8 @@ class Client implements IDable
         $this->isActive = $isActive;
     }
 
-    #[Groups(['client:patch:assignPartner', 'client:post'])]
+//    #[Groups(['client:patch:assignPartner', 'client:post'])]
+    #[Groups(['client:patch', 'client:post'])]
     public function setPartner(?Partner $partner): void
     {
         $this->partner = $partner;

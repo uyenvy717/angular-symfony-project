@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\GrowthPartner;
 use App\Entity\Partner;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -20,27 +19,24 @@ class UserRepository extends ServiceEntityRepository
 
     public function findUsersByPartner(?Partner $partner): array
     {
-        $query = $this->createQueryBuilder('u');
-
-        if ($partner) {
-            if ($partner instanceof GrowthPartner) {
-                $query->where('u.partner = :partner')
-                    ->orWhere('u.partner IN (
-                    SELECT a FROM App\Entity\AffiliatePartner a WHERE a.registeredPartner = :partner
-                )')
-                    ->orWhere('u.partner IN (
-                    SELECT spa FROM App\Entity\SolutionPartner spa WHERE spa.registeredPartner = :partner
-                )')
-                    ->orWhere('u.partner IN (
-                    SELECT spr FROM App\Entity\SolutionProvider spr WHERE spr.registeredPartner = :partner
-                )')
-                    ->setParameter('partner', $partner);
-            } else {
-                $query->where('u.partner = :partner');
-            }
-
+        if (!$partner) {
+            return [];
         }
 
+        $query = $this->createQueryBuilder('u');
+
+        $query->where('u.partner = :partner')
+            ->setParameter('partner', $partner);
+
         return $query->getQuery()->getResult();
+    }
+
+    public function findUsersByPartnerId(string $partnerId): array
+    {
+        $partner = $this->getEntityManager()
+            ->getRepository(Partner::class)
+            ->find($partnerId);
+
+        return $this->findUsersByPartner($partner);
     }
 }

@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\SolutionProviderRepository;
@@ -21,6 +22,18 @@ use Symfony\Component\Serializer\Attribute\Groups;
             security: "is_granted('ROLE_SUPER_ADMIN') or object.getRegisteredPartner() == user.getPartner()"
         ),
         new GetCollection(
+            provider: 'App\State\PartnerProvider.Provider'
+        ),
+        new GetCollection(
+            uriTemplate: '/solution_providers/by_registered_partner/{registeredPartnerId}',
+            uriVariables: [
+                'registeredPartnerId' => new Link(
+                    fromProperty: 'solutionProviders',
+                    fromClass: GrowthPartner::class,
+                    identifiers: ['id']
+                )
+            ],
+            name: 'get_solution_providers_by_registered_partner',
             provider: 'App\State\PartnerProvider.Provider'
         ),
         new Post(
@@ -80,6 +93,7 @@ class SolutionProvider extends Partner
         $this->registeredPartner = $partner;
     }
 
+    #[Groups(['client:read'])]
     public function getRegisteredPartner(): ?GrowthPartner
     {
         return $this->registeredPartner;
@@ -89,5 +103,11 @@ class SolutionProvider extends Partner
     public function getRegisteredPartnerId(): ?string
     {
         return $this->registeredPartner?->getId()->toString();
+    }
+
+    #[Groups(['client:read'])]
+    public function getRegisteredPartnerName(): ?string
+    {
+        return $this->registeredPartner?->getName();
     }
 }

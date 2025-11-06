@@ -1,1 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* You can add global styles to this file, and also import other style files */
+@import "app/styles/layout.scss";
+@import "app/styles/button.scss";
+@import "app/styles/dashboard.scss";
+@import "app/styles/form.scss";
+
+body {
+  @apply font-body;
+}

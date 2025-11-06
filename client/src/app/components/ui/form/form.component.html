@@ -1,0 +1,57 @@
+<div [class]="isLoginForm ? 'login-form-container' : ''">
+  <div [class]="isLoginForm ? 'login-form-box' : 'modal-form-box'">
+    @if (title(); as formTitle) {
+      <h1 class="text-3xl text-center mb-8">{{ formTitle }}</h1>
+    }
+    
+    <form nz-form [formGroup]="formGroup" (ngSubmit)="handleSubmit()">
+      @for (field of fields; track field.name) {
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="errorTpl">
+            @if (field.type === 'checkbox') {
+              <label nz-checkbox [formControlName]="field.name">
+                {{ field.label }}
+              </label>
+            } @else if (field.type === 'select') {
+              <nz-select [formControlName]="field.name" [nzPlaceHolder]="field.placeholder || field.label">
+                @for (option of field.options || []; track option.value) {
+                  <nz-option [nzValue]="option.value" [nzLabel]="option.label"></nz-option>
+                }
+              </nz-select>
+            } @else if (field.type === 'radio') {
+              <nz-radio-group [formControlName]="field.name">
+                @for (option of field.options || []; track option.value) {
+                  <label nz-radio-button [nzValue]="option.value">{{ option.label }}</label>
+                }
+              </nz-radio-group>
+            } @else {
+              <nz-input-group [nzPrefixIcon]="field.icon || ''">
+                <input 
+                  nz-input 
+                  [type]="field.type"
+                  [formControlName]="field.name"
+                  [placeholder]="field.placeholder || field.label"
+                />
+              </nz-input-group>
+            }
+          </nz-form-control>
+          <ng-template #errorTpl>
+            {{ getErrorMessage(formGroup.get(field.name), field) }}
+          </ng-template>
+        </nz-form-item>
+      }
+
+      <nz-form-item>
+        <button 
+          nz-button 
+          nzType="primary" 
+          type="submit"
+          class="form-button"
+          [disabled]="!formGroup.valid"
+        >
+          {{ submitButtonText() }}
+        </button>
+      </nz-form-item>
+    </form>
+  </div>
+</div>

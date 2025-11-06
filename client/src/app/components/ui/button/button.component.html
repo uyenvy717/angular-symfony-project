@@ -1,0 +1,13 @@
+@if (buttonType() === 'nav-panel-btn') {
+    <button [class]="buttonType()">
+        {{ label() }}
+    </button>
+} @else {
+    <button [class]="[buttonType(), color(), disabled() ? 'disabled-btn' : '']" [disabled]="disabled()">
+        @if (icon()) {
+            <span nz-icon [nzType]="icon()" nzTheme="outline"></span>
+        } @else {
+            {{ label() }}
+        }
+    </button>
+}
